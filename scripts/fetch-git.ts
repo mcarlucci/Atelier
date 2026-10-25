@@ -9,7 +9,6 @@
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { systemTar } from "../src/main/node/dist.ts";
@@ -60,7 +59,9 @@ const expected = checksum.toString("utf8").trim().split(/\s+/)[0];
 const actual = crypto.createHash("sha256").update(archive).digest("hex");
 if (actual !== expected) throw new Error(`${asset} failed its checksum (expected ${expected}, got ${actual}).`);
 
-const work = fs.mkdtempSync(path.join(os.tmpdir(), "atelier-git-"));
+// Work next to the destination: on CI the temp folder can be on another drive, where rename fails.
+fs.mkdirSync(destDir, { recursive: true });
+const work = fs.mkdtempSync(path.join(destDir, ".download-"));
 try {
   const file = path.join(work, asset);
   fs.writeFileSync(file, archive);
@@ -71,7 +72,6 @@ try {
   prune(out);
   fs.writeFileSync(path.join(out, "COPYING"), license);
   fs.rmSync(target, { recursive: true, force: true });
-  fs.mkdirSync(destDir, { recursive: true });
   fs.renameSync(out, target);
   fs.writeFileSync(stamp, `${BUILD}\n`);
 } finally {
