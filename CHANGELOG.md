@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/mcarlucci/Atelier/compare/v0.2.0...v0.2.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* unpack downloads with Windows' built-in tar ([d914c54](https://github.com/mcarlucci/Atelier/commit/d914c548ecc93c3e5e343aa03bf8292184816324))
+
 ## [0.2.0](https://github.com/mcarlucci/Atelier/compare/v0.1.0...v0.2.0) (2026-10-25)
 
 
