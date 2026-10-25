@@ -157,9 +157,18 @@ export async function downloadRuntime(opts: {
   }
 }
 
+/**
+ * The system tar. On Windows that is bsdtar in System32, called by full path:
+ * Git for Windows puts GNU tar on PATH, which reads `D:\…` as a remote host
+ * and can't open zip files.
+ */
+export function systemTar(): string {
+  return process.platform === "win32" ? path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe") : "tar";
+}
+
 function extract(file: string, cwd: string, flags: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn("tar", [...flags, file], { cwd, stdio: ["ignore", "ignore", "pipe"] });
+    const child = spawn(systemTar(), [...flags, file], { cwd, stdio: ["ignore", "ignore", "pipe"] });
     let stderr = "";
     child.stderr.on("data", (d: Buffer) => (stderr += d.toString()));
     child.on("error", reject);

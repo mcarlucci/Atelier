@@ -12,6 +12,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { parseArgs } from "node:util";
+import { systemTar } from "../src/main/node/dist.ts";
 
 // Pinned so every build ships the same, checksum-verified git.
 const RELEASE = "v2.56.0-1";
@@ -66,7 +67,7 @@ try {
   const out = path.join(work, "out");
   fs.mkdirSync(out);
   // bsdtar ships with macOS and Windows 10+.
-  execFileSync("tar", ["-xzf", file, "-C", out], { stdio: "inherit" });
+  execFileSync(systemTar(), ["-xzf", file, "-C", out], { stdio: "inherit" });
   prune(out);
   fs.writeFileSync(path.join(out, "COPYING"), license);
   fs.rmSync(target, { recursive: true, force: true });
