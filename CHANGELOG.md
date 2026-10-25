@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/mcarlucci/Atelier/compare/v0.2.1...v0.2.2) (2026-10-25)
+
+
+### Bug Fixes
+
+* unpack bundled git on the same drive as its destination ([5b4b952](https://github.com/mcarlucci/Atelier/commit/5b4b952c59f408eb7af93b6f5cc225a6b3bae2c9))
+
 ## [0.2.1](https://github.com/mcarlucci/Atelier/compare/v0.2.0...v0.2.1) (2026-10-25)
 
 
