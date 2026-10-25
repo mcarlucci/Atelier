@@ -1,6 +1,6 @@
 {
   "name": "atelier",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Local AI app builder for teams that bring their own design system",
   "private": true,
   "main": "out/main/index.js",
