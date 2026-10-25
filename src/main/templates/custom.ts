@@ -10,7 +10,7 @@ import type { FrameworkId } from "@shared/types";
 import { FRAMEWORK_PACKAGE, type TemplateSource } from "@shared/templates";
 import { ANGULAR_STYLES_FILE } from "../frameworks/angular";
 import { kitFor } from "../frameworks";
-import { runOrThrow } from "../process";
+import { runGit } from "../git";
 
 export const TEMPLATE_MANIFEST = "atelier.template.json";
 const IGNORED = new Set(["node_modules", ".git", "dist", "build", "out", ".next", ".nuxt", ".output", ".angular", ".svelte-kit", "coverage", ".turbo", ".cache", ".vite"]);
@@ -49,7 +49,7 @@ export async function snapshotSource(source: Exclude<TemplateSource, { kind: "bu
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "atelier-template-"));
   try {
     // `--` keeps a URL that starts with "-" from being read as an option.
-    await runOrThrow("git", ["clone", "--depth", "1", ...(source.ref ? ["--branch", source.ref] : []), "--", source.url, tmp], {
+    await runGit(["clone", "--depth", "1", ...(source.ref ? ["--branch", source.ref] : []), "--", source.url, tmp], {
       env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
     });
     if (!fs.existsSync(path.join(tmp, "package.json"))) throw new Error("The repository has no package.json at its root.");

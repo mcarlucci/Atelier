@@ -81,7 +81,7 @@ Every change is saved as a version. Look back through the history and restore an
 - **Frameworks:** React, Vue 3 and Angular (17 to 22).
 - **Design systems:** any component library published as an npm package with TypeScript types, such as Radix Themes, MUI, Mantine, Vuetify, PrimeVue, Element Plus, PrimeNG or Angular Material. Vuetify, PrimeVue, PrimeNG and Angular Material are set up automatically.
 - **Your own starter app:** import your product shell as a template, from a folder or a git repository, so prototypes look and feel like the real product.
-- **Nothing else to install:** Atelier ships with its own Node.js. You only need git.
+- **Nothing else to install:** Atelier ships with its own Node.js and git.
 
 ## Bring your own AI model
 
@@ -118,11 +118,9 @@ Download the installer for your computer from the [latest release](../../release
 
 Atelier isn't code-signed yet, so your computer shows a warning the first time you open it:
 
-- **macOS:** drag Atelier to Applications and open it. When macOS blocks it, open **System Settings → Privacy & Security** and click **Open Anyway**. You can also run `xattr -dr com.apple.quarantine /Applications/Atelier.app`. This is needed again after each update.
+- **macOS:** drag Atelier to Applications and open it. When macOS says “Atelier” Not Opened, click **Done**, double-click **Open Security Settings** in the installer window, and click **Open Anyway**. You can also run `xattr -dr com.apple.quarantine /Applications/Atelier.app`. This is needed again after each update.
 - **Windows:** in the SmartScreen dialog, click **More info → Run anyway**.
 - **Linux:** run `chmod +x Atelier-*.AppImage`, then open the file.
-
-You also need [git](https://git-scm.com/downloads) installed.
 
 **Updates:** to hear about new versions, choose **Watch → Custom → Releases** on this repository. To update, download and install the new version the same way.
 
@@ -142,7 +140,7 @@ Atelier is in early development (0.x). React works end to end. Vue and Angular s
 
 ## License
 
-Atelier is released under the [Functional Source License, Version 1.1, MIT Future License](LICENSE) (FSL-1.1-MIT).
+Atelier is released under the [Functional Source License, Version 1.1, MIT Future License](LICENSE) (FSL-1.1-MIT). It includes open-source components under their own licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).
 
 - **You can** use Atelier for any purpose, including at work and inside your company, and read, change and share the code.
 - **You can't** use the code to offer a commercial product or service that competes with Atelier.

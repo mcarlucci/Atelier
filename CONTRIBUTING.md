@@ -11,9 +11,9 @@ ATELIER_INTEGRATION=1 npx vitest run tests/import.integration.test.ts      # imp
 ATELIER_INTEGRATION=1 npx vitest run tests/templates.integration.test.ts   # installs, builds and serves each built-in template
 ```
 
-To package installers locally, run `npm run fetch-node` for each target, then `npm run dist`. Output goes to `dist/`.
+To package installers locally, run `npm run fetch-node` and `npm run fetch-git` for each target (`-- --platform <darwin|win32|linux> --arch <x64|arm64>`), then `npm run dist`. Output goes to `dist/`.
 
-Requirements: git on `PATH` (the login shell's `PATH` is picked up when launched from Finder). Developing Atelier itself needs Node 22.18+ and npm; run `npm run fetch-node` once so apps use the bundled Node.js in development too.
+Requirements: Node 22.18+ and npm for developing Atelier itself. Run `npm run fetch-node` and `npm run fetch-git` once, so apps use the bundled Node.js and git in development too. Without the bundled git, development runs fall back to git on `PATH`.
 
 ## Release
 

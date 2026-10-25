@@ -6,6 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import semver from "semver";
+import { gitEnv } from "../git";
 import { NPM, NPX, systemNodeVersion } from "../process";
 import {
   CURRENT_PLATFORM,
@@ -156,7 +157,9 @@ export function runtimeCommand(rt: NodeRuntime, program: string, args: string[])
 }
 
 /** `env` with the runtime first on PATH. */
-export function runtimeEnv(rt: NodeRuntime, env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+export function runtimeEnv(rt: NodeRuntime, baseEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  // npm runs git for git-hosted dependencies, so it gets the bundled git too.
+  const env = gitEnv(baseEnv);
   if (!rt.binDir) return env;
   // Windows environment keys are case-insensitive; keep whichever spelling is present.
   const key = Object.keys(env).find((k) => k.toUpperCase() === "PATH") ?? "PATH";

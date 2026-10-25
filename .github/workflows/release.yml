@@ -53,10 +53,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Bundle Node.js
+      - name: Bundle Node.js and git
         run: |
           for t in ${{ matrix.targets }}; do
             npm run fetch-node -- --platform "${t%%:*}" --arch "${t##*:}"
+            npm run fetch-git -- --platform "${t%%:*}" --arch "${t##*:}"
           done
       - run: npm run dist
       - name: Attach installers

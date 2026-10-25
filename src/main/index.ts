@@ -2,6 +2,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, net, safeStorage, shell } from "electron";
 import { INVOKE_CHANNELS, type EventChannels, type InvokeChannel, type InvokeChannels } from "@shared/ipc";
+import { useBundledGit } from "./git";
 import { Services } from "./services";
 import { selectorScript } from "./preview/selector";
 
@@ -212,6 +213,8 @@ app.whenReady().then(() => {
   inheritShellPath();
   // An unpackaged run is Electron.app, whose dock icon is Electron's.
   if (process.platform === "darwin" && !app.isPackaged) app.dock?.setIcon(brandAsset("png/icon-512.png"));
+  // Packaging copies resources/git into the app's Resources folder, like Node.js below.
+  useBundledGit(app.isPackaged ? path.join(process.resourcesPath, "git") : path.join(app.getAppPath(), "resources/git"));
   const services = new Services({
     userDataDir: app.getPath("userData"),
     emit,

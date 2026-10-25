@@ -48,16 +48,29 @@ function useProperty(ref: RefObject<HTMLElement | null>, name: string, value: un
   }, [ref, name, value]);
 }
 
-function useEvent(ref: RefObject<HTMLElement | null>, type: string, handler?: (el: Writable, event: Event) => void): void {
+/**
+ * Listens for `type` on the element. Events bubbling up from Slab elements
+ * nested inside it (a field's `change` inside tabs or a dialog) are ignored,
+ * unless `fromChildren` is set for events that come from its own content.
+ */
+function useEvent(
+  ref: RefObject<HTMLElement | null>,
+  type: string,
+  handler?: (el: Writable, event: Event) => void,
+  { fromChildren = false }: { fromChildren?: boolean } = {},
+): void {
   const latest = useRef(handler);
   latest.current = handler;
   useEffect(() => {
     const el = ref.current as Writable | null;
     if (!el) return;
-    const listener = (event: Event) => latest.current?.(el, event);
+    const listener = (event: Event) => {
+      if (!fromChildren && event.target !== el) return;
+      latest.current?.(el, event);
+    };
     el.addEventListener(type, listener);
     return () => el.removeEventListener(type, listener);
-  }, [ref, type]);
+  }, [ref, type, fromChildren]);
 }
 
 // ---------------------------------------------------------------- fields
@@ -209,10 +222,15 @@ export function Checkbox(props: { label: string; checked: boolean; onChecked(che
 export function ToggleGroup(props: { label: string; value: string; options: Choice[]; onValue(value: string): void; className?: string }) {
   const ref = useRef<HTMLElement>(null);
   // The group has no change event; buttons report presses through clicks.
-  useEvent(ref, "click", (el) => {
-    const value = String(el.value ?? "");
-    if (value && value !== props.value) props.onValue(value);
-  });
+  useEvent(
+    ref,
+    "click",
+    (el) => {
+      const value = String(el.value ?? "");
+      if (value && value !== props.value) props.onValue(value);
+    },
+    { fromChildren: true },
+  );
   return (
     <slab-toggle-group ref={ref} label={props.label} class={`segmented${props.className ? ` ${props.className}` : ""}`}>
       {props.options.map((o) => (
@@ -283,12 +301,22 @@ export function Tooltip({ label, children, placement = "bottom" }: { label: stri
   const keyboardFocused = (el: Writable) => Boolean((el as unknown as HTMLElement).querySelector(":focus-visible"));
   // Slab keeps a tooltip open while its anchor has focus, so a clicked button's
   // tooltip would never hide. Only keyboard focus (:focus-visible) keeps it open.
-  useEvent(ref, "focusin", (el) => {
-    if (!keyboardFocused(el)) el.open = false;
-  });
-  useEvent(ref, "pointerdown", (el) => {
-    el.open = false;
-  });
+  useEvent(
+    ref,
+    "focusin",
+    (el) => {
+      if (!keyboardFocused(el)) el.open = false;
+    },
+    { fromChildren: true },
+  );
+  useEvent(
+    ref,
+    "pointerdown",
+    (el) => {
+      el.open = false;
+    },
+    { fromChildren: true },
+  );
   useEvent(ref, "mouseenter", () => window.clearTimeout(closeTimer.current));
   useEvent(ref, "mouseleave", (el) => {
     if (!el.open || keyboardFocused(el)) return;

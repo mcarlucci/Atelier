@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "test": "vitest run",
     "fetch-node": "node scripts/fetch-node.ts",
-    "dist": "electron-vite build && electron-builder --publish never"
+    "dist": "electron-vite build && electron-builder --publish never",
+    "fetch-git": "node scripts/fetch-git.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",
@@ -57,6 +58,13 @@
           "filter": [
             "node-v*-darwin-${arch}/**"
           ]
+        },
+        {
+          "from": "resources/git",
+          "to": "git",
+          "filter": [
+            "darwin-${arch}/**"
+          ]
         }
       ],
       "identity": "-",
@@ -80,6 +88,13 @@
           "filter": [
             "node-v*-win-${arch}/**"
           ]
+        },
+        {
+          "from": "resources/git",
+          "to": "git",
+          "filter": [
+            "win32-${arch}/**"
+          ]
         }
       ],
       "target": [
@@ -100,6 +115,13 @@
           "filter": [
             "node-v*-linux-${arch}/**"
           ]
+        },
+        {
+          "from": "resources/git",
+          "to": "git",
+          "filter": [
+            "linux-${arch}/**"
+          ]
         }
       ],
       "target": [
@@ -115,6 +137,42 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "dmg": {
+      "background": "build/dmg-background.tiff",
+      "iconSize": 80,
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 150,
+          "y": 140
+        },
+        {
+          "x": 390,
+          "y": 140,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 430,
+          "y": 292,
+          "type": "file",
+          "path": "build/Open Security Settings.inetloc"
+        }
+      ]
+    },
+    "extraResources": [
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE"
+      }
+    ]
   }
 }
