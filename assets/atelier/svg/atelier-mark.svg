@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="atelierGradient" x1="92" y1="360" x2="414" y2="152" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#526BFF"/>
+      <stop offset="0.52" stop-color="#7774FF"/>
+      <stop offset="1" stop-color="#D18BFF"/>
+    </linearGradient>
+  </defs>
+  <path d="M104 366 L207 177 Q224 146 249 146 L273 146 Q298 146 315 177 L418 366 L339 366 L267 232 Q261 221 256 221 Q251 221 245 232 L173 366 Z"
+        fill="url(#atelierGradient)"/>
+  <path d="M256 221 Q274 221 287 244 L339 366 L267 366 L236 308 Z" fill="#151622" opacity=".18"/>
+</svg>

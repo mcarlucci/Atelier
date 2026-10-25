@@ -1,0 +1,747 @@
+/*
+ * Atelier's look for Slab elements. Slab ships behavior only; everything
+ * visual is applied here through ::part() and :state().
+ */
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------- fields */
+
+slab-text-field,
+slab-textarea,
+slab-select,
+slab-listbox {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+slab-text-field::part(label),
+slab-textarea::part(label),
+slab-select::part(label),
+slab-checkbox::part(label) {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Spacing lives on the parts, not a flex gap, so empty description parts take no room. */
+slab-text-field::part(label),
+slab-textarea::part(label),
+slab-select::part(label) {
+  margin-bottom: 6px;
+}
+
+slab-text-field::part(input),
+slab-textarea::part(textarea),
+slab-select::part(combobox) {
+  /* Page-level box-sizing does not reach into shadow roots. */
+  box-sizing: border-box;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  padding: 7px 10px;
+  box-shadow: var(--shadow-sm);
+  inline-size: 100%;
+  min-block-size: 34px;
+}
+
+slab-textarea::part(textarea) {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+slab-text-field::part(input):focus-visible,
+slab-textarea::part(textarea):focus-visible,
+slab-select::part(combobox):focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+slab-text-field::part(input)::placeholder,
+slab-textarea::part(textarea)::placeholder {
+  color: var(--muted);
+}
+
+slab-text-field::part(description),
+slab-textarea::part(description),
+slab-select::part(description) {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+slab-text-field::part(validity-message),
+slab-textarea::part(validity-message),
+slab-select::part(validity-message) {
+  color: var(--danger);
+}
+
+slab-text-field:state(disabled),
+slab-textarea:state(disabled),
+slab-select:state(disabled) {
+  opacity: 0.5;
+}
+
+/* ---------------------------------------------------------------- select */
+
+slab-select {
+  min-inline-size: 180px;
+}
+
+slab-select::part(combobox) {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-inline-end: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%238b93a7' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+slab-select::part(value) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+slab-select:state(placeholder-shown)::part(value) {
+  color: var(--muted);
+}
+
+slab-select::part(popover) {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  margin-block: 4px;
+  min-inline-size: anchor-size(width);
+  max-block-size: 320px;
+  overflow: auto;
+  padding: 4px;
+}
+
+slab-option {
+  display: block;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 6px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+slab-option:state(active) {
+  background: var(--hover);
+}
+
+slab-option:state(selected) {
+  font-weight: 600;
+}
+
+slab-option:state(disabled) {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------------------------------------------------------------- listbox (file list) */
+
+slab-listbox.file-list {
+  inline-size: 260px;
+  flex: none;
+  border-inline-end: 1px solid var(--border);
+}
+
+slab-listbox.file-list::part(listbox) {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  block-size: 100%;
+  overflow: auto;
+  padding: 8px;
+  outline: none;
+}
+
+slab-listbox.file-list slab-option {
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+slab-listbox.file-list slab-option:state(selected) {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+/* ---------------------------------------------------------------- checkbox */
+
+slab-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+slab-checkbox::part(checkbox) {
+  block-size: 16px;
+  inline-size: 16px;
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+}
+
+slab-checkbox:state(checked)::part(checkbox) {
+  background: var(--accent)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='white' stroke-width='1.8'/%3E%3C/svg%3E")
+    center / 12px no-repeat;
+  border-color: var(--accent);
+}
+
+slab-checkbox:focus-within::part(checkbox) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* ---------------------------------------------------------------- tabs */
+
+slab-tabs::part(tablist) {
+  display: flex;
+  gap: 2px;
+  align-self: flex-start;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+}
+
+slab-tabs-tab {
+  border-radius: 7px;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 500;
+  padding: 5px 12px;
+  white-space: nowrap;
+  transition: color 0.12s, background 0.12s;
+}
+
+slab-tabs-tab:hover {
+  color: var(--text);
+}
+
+slab-tabs-tab:state(selected) {
+  background: var(--bg);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border);
+  color: var(--text);
+}
+
+slab-tabs-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+slab-tabs-panel {
+  display: block;
+}
+
+slab-tabs-panel.panel-stack:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Detail page tabs sit in the scrolling column. */
+.page-scroll > slab-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Workspace tabs fill the preview pane. */
+slab-tabs.workspace-tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The tablist sits in a 52px header, with the preview toolbar laid over its right end. */
+slab-tabs.workspace-tabs::part(tablist) {
+  box-sizing: border-box;
+  block-size: 34px;
+  margin: 9px 12px;
+}
+
+slab-tabs.workspace-tabs slab-tabs-tab {
+  padding-block: 4px;
+}
+
+/* Settings tabs sit under the page title and fill the rest of the window. */
+slab-tabs.settings-tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+slab-tabs.settings-tabs::part(tablist) {
+  margin: 0 32px 14px;
+}
+
+slab-tabs-panel.tab-body:not([hidden]) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  border-top: 1px solid var(--border);
+}
+
+/* ---------------------------------------------------------------- toggle group */
+
+slab-toggle-group {
+  align-self: flex-start;
+}
+
+slab-toggle-group::part(group) {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-2);
+}
+
+slab-toggle-group-button {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 7px;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 500;
+  padding: 5px 12px;
+  transition: color 0.12s, background 0.12s;
+}
+
+slab-toggle-group-button:hover {
+  color: var(--text);
+}
+
+slab-toggle-group-button:state(pressed) {
+  background: var(--bg);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border);
+  color: var(--text);
+}
+
+slab-toggle-group.compact::part(group) {
+  padding: 2px;
+  border-radius: 8px;
+}
+
+slab-toggle-group.compact slab-toggle-group-button {
+  padding: 4px 7px;
+  border-radius: 6px;
+}
+
+slab-toggle-group-button:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+/* ---------------------------------------------------------------- toolbar, tooltip, progress */
+
+slab-toolbar::part(toolbar) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Inverted against the app: dark on light, light on dark. The browser's
+   popover border is reset; it drew a medium solid border. */
+slab-tooltip::part(tooltip) {
+  background: var(--text);
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 16%), 0 1px 2px rgb(0 0 0 / 10%);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  margin: 8px;
+  max-inline-size: 260px;
+  padding: 5px 9px;
+  pointer-events: none;
+  white-space: normal;
+  opacity: 0;
+  transition: opacity 0.12s ease, display 0.12s allow-discrete, overlay 0.12s allow-discrete;
+}
+
+slab-tooltip:state(open)::part(tooltip) {
+  opacity: 1;
+}
+
+@starting-style {
+  slab-tooltip:state(open)::part(tooltip) {
+    opacity: 0;
+  }
+}
+
+slab-progress::part(progress) {
+  accent-color: var(--accent);
+  block-size: 4px;
+  inline-size: 220px;
+}
+
+/* ---------------------------------------------------------------- alert */
+
+slab-alert {
+  --tone: var(--accent);
+  display: block;
+  /* The dismiss button is rendered beside the alert part, not inside it. */
+  position: relative;
+}
+
+slab-alert.tone-warning {
+  --tone: var(--warn);
+}
+
+slab-alert.tone-danger {
+  --tone: var(--danger);
+}
+
+slab-alert.tone-success {
+  --tone: var(--ok);
+}
+
+slab-alert::part(alert) {
+  background: color-mix(in srgb, var(--tone) 7%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--tone) 35%, transparent);
+  border-radius: 10px;
+  display: block;
+  position: relative;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 12px;
+}
+
+slab-alert[dismissible]::part(alert) {
+  padding-inline-end: 72px;
+}
+
+slab-alert::part(dismiss-button) {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 2px;
+  min-block-size: 0;
+  box-shadow: none;
+}
+
+slab-alert ul {
+  margin: 6px 0;
+  padding-left: 16px;
+}
+
+slab-alert button {
+  margin-top: 4px;
+}
+
+/* ---------------------------------------------------------------- dialog */
+
+slab-dialog::part(dialog) {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  inline-size: min(480px, 90vw);
+  padding: 20px;
+}
+
+slab-dialog::part(dialog)::backdrop {
+  background: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(2px);
+}
+
+slab-dialog::part(label) {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+slab-dialog p {
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.row.actions {
+  justify-content: flex-end;
+}
+
+/* ---------------------------------------------------------------- toast */
+
+slab-toast {
+  --tone: var(--accent);
+}
+
+slab-toast.tone-success {
+  --tone: var(--ok);
+}
+
+slab-toast.tone-danger {
+  --tone: var(--danger);
+}
+
+slab-toast.tone-warning {
+  --tone: var(--warn);
+}
+
+slab-toast::part(region) {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--tone);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  inset: auto 20px 20px auto;
+  margin: 0;
+  max-inline-size: 420px;
+  padding: 10px 14px;
+}
+
+/* ---------------------------------------------------------------- menu */
+
+slab-menu {
+  display: inline-block;
+}
+
+slab-menu::part(popover) {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  margin: 6px;
+  min-inline-size: 180px;
+  max-inline-size: 320px;
+  max-block-size: 360px;
+  overflow: auto;
+  padding: 4px;
+}
+
+slab-menu::part(menu) {
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+slab-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
+slab-menu-item .icon {
+  color: var(--muted);
+}
+
+slab-menu-item:state(active) {
+  background: var(--hover);
+}
+
+slab-menu-item.current {
+  font-weight: 600;
+}
+
+slab-menu-item.current::after {
+  content: "";
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: auto;
+  flex: none;
+}
+
+slab-menu-item.danger,
+slab-menu-item.danger .icon {
+  color: var(--danger);
+}
+
+slab-menu-item:state(disabled) {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------------------------------------------------------------- tree (file explorer) */
+
+slab-tree::part(tree) {
+  outline: none;
+  font-size: 12.5px;
+}
+
+slab-tree-item {
+  display: block;
+  cursor: pointer;
+}
+
+slab-tree-item::part(label) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+slab-tree-item:state(parent)::part(label)::before {
+  content: "";
+  inline-size: 10px;
+  block-size: 10px;
+  flex: none;
+  background: currentColor;
+  opacity: 0.5;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3.5 2l3 3-3 3' fill='none' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform 0.12s;
+}
+
+slab-tree-item:not(:state(parent))::part(label) {
+  padding-left: 22px;
+}
+
+slab-tree-item:state(parent):state(expanded)::part(label)::before {
+  transform: rotate(90deg);
+}
+
+slab-tree-item::part(group) {
+  padding-left: 12px;
+}
+
+slab-tree:focus-visible slab-tree-item:state(active)::part(label),
+slab-tree-item:hover::part(label) {
+  background: var(--hover);
+}
+
+slab-tree-item:state(selected)::part(label) {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- disclosure (code in chat) */
+
+slab-disclosure.action-code {
+  display: block;
+}
+
+slab-disclosure.action-code::part(summary) {
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 6px 10px 8px 42px;
+}
+
+slab-disclosure.action-code::part(summary)::-webkit-details-marker {
+  display: none;
+}
+
+slab-disclosure.action-code::part(summary):hover {
+  color: var(--text);
+}
+
+slab-disclosure.action-code::part(summary)::after {
+  content: " ▸";
+}
+
+slab-disclosure.action-code[open]::part(summary)::after {
+  content: " ▾";
+}
+
+/* ---------------------------------------------------------------- composer chips */
+
+slab-select.ds-picker {
+  min-inline-size: 0;
+}
+
+slab-select.ds-picker::part(combobox) {
+  min-block-size: 28px;
+  padding: 2px 28px 2px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--muted);
+  box-shadow: none;
+}
+
+slab-text-field.app-search::part(input) {
+  min-block-size: 30px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+slab-pagination::part(list) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+slab-pagination::part(page),
+slab-pagination::part(previous),
+slab-pagination::part(next) {
+  min-inline-size: 32px;
+  min-block-size: 32px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+slab-pagination::part(page):hover,
+slab-pagination::part(previous):hover,
+slab-pagination::part(next):hover {
+  color: var(--text);
+}
+
+slab-pagination::part(current) {
+  background: var(--bg);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+}
+
+slab-pagination:state(first)::part(previous),
+slab-pagination:state(last)::part(next) {
+  opacity: 0.4;
+  cursor: default;
+}
+
+slab-pagination::part(ellipsis) {
+  color: var(--muted);
+  padding-inline: 4px;
+}

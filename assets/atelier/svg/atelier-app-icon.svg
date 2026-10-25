@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="50" x2="940" y2="990" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1A1D29"/><stop offset="1" stop-color="#080A11"/>
+    </linearGradient>
+    <linearGradient id="atelierGradient" x1="220" y1="720" x2="795" y2="310" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#526BFF"/><stop offset=".52" stop-color="#7774FF"/><stop offset="1" stop-color="#D18BFF"/>
+    </linearGradient>
+  </defs>
+  <rect x="24" y="24" width="976" height="976" rx="220" fill="url(#bg)"/>
+  <rect x="25" y="25" width="974" height="974" rx="219" fill="none" stroke="#FFFFFF" stroke-opacity=".09" stroke-width="3"/>
+  <path d="M214 724 L408 368 Q440 310 487 310 L537 310 Q584 310 616 368 L810 724 L665 724 L530 474 Q520 453 512 453 Q504 453 494 474 L359 724 Z"
+        fill="url(#atelierGradient)"/>
+  <path d="M512 453 Q546 453 570 497 L665 724 L530 724 L472 616 Z" fill="#171827" opacity=".18"/>
+</svg>

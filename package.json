@@ -1,0 +1,120 @@
+{
+  "name": "atelier",
+  "version": "0.1.0",
+  "description": "Local AI app builder for teams that bring their own design system",
+  "private": true,
+  "main": "out/main/index.js",
+  "license": "FSL-1.1-MIT",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "test": "vitest run",
+    "fetch-node": "node scripts/fetch-node.ts",
+    "dist": "electron-vite build && electron-builder --publish never"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "semver": "^7.8.5",
+    "typescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/semver": "^7.8.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0",
+    "electron-vite": "^6.0.0",
+    "lit": "^3.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "slab-elements": "^0.1.2",
+    "vite": "^8.0.0",
+    "vitest": "^4.0.0"
+  },
+  "build": {
+    "appId": "dev.atelier.app",
+    "productName": "Atelier",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*",
+      "assets/atelier/png/**",
+      "assets/atelier/windows/**"
+    ],
+    "mac": {
+      "icon": "assets/atelier/macos/icon.icns",
+      "extraResources": [
+        {
+          "from": "resources/node",
+          "to": "node",
+          "filter": [
+            "node-v*-darwin-${arch}/**"
+          ]
+        }
+      ],
+      "identity": "-",
+      "hardenedRuntime": false,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "icon": "assets/atelier/windows/icon.ico",
+      "extraResources": [
+        {
+          "from": "resources/node",
+          "to": "node",
+          "filter": [
+            "node-v*-win-${arch}/**"
+          ]
+        }
+      ],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "assets/atelier/png/icon-512.png",
+      "extraResources": [
+        {
+          "from": "resources/node",
+          "to": "node",
+          "filter": [
+            "node-v*-linux-${arch}/**"
+          ]
+        }
+      ],
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Development"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
