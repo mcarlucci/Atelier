@@ -35,6 +35,10 @@ export interface InvokeChannels {
     result: Settings;
   };
   "settings:configure-provider": { args: [ProviderId, ProviderUpdate]; result: Settings };
+  /** Whether an Anthropic key sits in the OS credential store. Never reads the key. */
+  "settings:detect-keychain-key": { args: []; result: { found: boolean; source?: string } };
+  /** Copies that key into Atelier's own encrypted store. */
+  "settings:import-keychain-key": { args: []; result: Settings };
   /** Models the provider reports. Doubles as a connection test; `error` when the server can't be reached. */
   "llm:models": { args: [ProviderId]; result: { models: string[]; error?: string } };
 
@@ -136,6 +140,8 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   "settings:get",
   "settings:set",
   "settings:configure-provider",
+  "settings:detect-keychain-key",
+  "settings:import-keychain-key",
   "llm:models",
   "ds:list",
   "ds:get",

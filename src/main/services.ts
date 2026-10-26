@@ -28,6 +28,7 @@ import { importDesignSystem, npmEnv, npmrcFor } from "./design-system/importer";
 import { buildDesignSystemRules } from "./design-system/rules";
 import { writeFile } from "./templates";
 import { TemplateService } from "./templates/service";
+import { findKeychainKey, readKeychainKey, type KeychainKeyInfo } from "./credential-store";
 import { gitCommitAll, gitInit, gitLog, gitRestore, gitTrackedFiles } from "./git";
 import { AppRunner, type RunTarget } from "./runner";
 import { NodeRuntimes } from "./node/runtimes";
@@ -174,6 +175,19 @@ export class Services {
       if (encrypted !== undefined) c.encryptedApiKey = encrypted ?? undefined;
     });
     return this.getSettings();
+  }
+
+  /** Reports a key in the OS credential store, unless Atelier already has one. Never reads the key. */
+  async detectKeychainKey(): Promise<KeychainKeyInfo> {
+    if (this.providerSettings("anthropic").hasApiKey) return { found: false };
+    return findKeychainKey();
+  }
+
+  /** The only place the credential store's key is read. It then lives in Atelier's own encrypted store. */
+  async importKeychainKey(): Promise<Settings> {
+    const key = await readKeychainKey();
+    if (!key) throw new Error("No Anthropic API key (sk-ant-…) found in the OS credential store, or access was denied.");
+    return this.configureProvider("anthropic", { apiKey: key });
   }
 
   private providerSettings(id: ProviderId): ProviderSettings {

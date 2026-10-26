@@ -115,6 +115,8 @@ function registerHandlers(services: Services): void {
     "settings:get": () => services.getSettings(),
     "settings:set": (patch) => services.setSettings(patch),
     "settings:configure-provider": (id, update) => services.configureProvider(id, update),
+    "settings:detect-keychain-key": () => services.detectKeychainKey(),
+    "settings:import-keychain-key": () => services.importKeychainKey(),
     "llm:models": (id) => services.listProviderModels(id),
 
     "ds:list": () => services.listDesignSystems(),

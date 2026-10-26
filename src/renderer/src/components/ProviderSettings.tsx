@@ -98,6 +98,25 @@ function ProviderForm({
 
   useEffect(refresh, [refresh]);
 
+  // A key already saved in the OS credential store. Only detected here; it is read on Import.
+  const [stored, setStored] = useState<string | null>(null);
+  useEffect(() => {
+    if (state.id !== "anthropic" || state.hasApiKey) return setStored(null);
+    let live = true;
+    api
+      .invoke("settings:detect-keychain-key")
+      .then((r) => live && setStored(r.found ? (r.source ?? "the OS credential store") : null))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [state.id, state.hasApiKey]);
+  const importStored = () =>
+    api
+      .invoke("settings:import-keychain-key")
+      .then((s) => onSettings(s, "API key imported."))
+      .catch((e) => toast(errorMessage(e), "danger"));
+
   const options = [...new Set([...(models ?? []), ...(state.model ? [state.model] : [])])].map((m) => ({ value: m, label: modelLabel(m) }));
 
   return (
@@ -152,6 +171,17 @@ function ProviderForm({
           </button>
           {state.hasApiKey && <button onClick={() => void configure(state.id, { apiKey: null }, "API key removed.")}>Remove</button>}
         </div>
+      )}
+
+      {stored && !state.hasApiKey && (
+        <Alert tone="info">
+          <div className="row">
+            <span className="grow">Found an Anthropic key in {stored}. Importing copies it into Atelier's encrypted store.</span>
+            <button className="primary" onClick={() => void importStored()}>
+              Import
+            </button>
+          </div>
+        </Alert>
       )}
 
       {error && (

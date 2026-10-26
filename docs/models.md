@@ -6,7 +6,7 @@ Choose a model provider under **Settings → AI model**:
 
 | Provider | Kind | Key |
 |---|---|---|
-| Anthropic (default: Claude Opus 5.5, adaptive thinking, selectable effort) | Anthropic SDK, with prompt caching | Required, or set `ANTHROPIC_API_KEY` |
+| Anthropic (default: Claude Opus 5.5, adaptive thinking, selectable effort) | Anthropic SDK, with prompt caching | Required, or set `ANTHROPIC_API_KEY`. Settings offers to import one saved in macOS Keychain or Windows Credential Manager under the name `Atelier`, `anthropic`, `ANTHROPIC_API_KEY` or `anthropic-api-key` |
 | Ollama | Native `/api/chat`, with a configurable context window (default 32768 tokens) | None, runs locally |
 | LM Studio | OpenAI-compatible | None, runs locally |
 | OpenRouter, Groq, Google Gemini, Mistral | OpenAI-compatible | Required (each has a free tier) |
