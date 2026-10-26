@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/mcarlucci/Atelier/compare/v0.2.2...v0.3.0) (2026-10-26)
+
+
+### Features
+
+* add keychain integration for Anthropic API key management ([b11c7a8](https://github.com/mcarlucci/Atelier/commit/b11c7a86ef275196f8395aa57b2185d3b4dadeed))
+
 ## [0.2.2](https://github.com/mcarlucci/Atelier/compare/v0.2.1...v0.2.2) (2026-10-25)
 
 
