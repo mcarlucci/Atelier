@@ -8,7 +8,7 @@
 <h3 align="center">Prototype with your real design system, just by describing what you want.</h3>
 
 <p align="center">
-  Atelier is a desktop app that turns a chat into a working prototype built only from <em>your</em> company's components.<br>
+  Atelier is a desktop app that turns a chat into a working prototype built only from <em>your</em> custom UI components.<br>
   Designers, product managers and partners get real, clickable screens. Engineers get code they can actually ship.
 </p>
 
