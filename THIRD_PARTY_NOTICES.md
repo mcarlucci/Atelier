@@ -62,3 +62,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## Invariant UI
+
+Atelier ships Invariant UI (`invariant-ui`, [invariantui.com](https://invariantui.com)) as a separate program (in the app's `Resources/invariant` folder). It compiles a design system into a contract and checks generated code against it.
+
+- **License:** Functional Source License, Version 1.1, Apache-2.0 Future License (FSL-1.1-ALv2). The license text ships in `Resources/invariant/LICENSE`. Its dependencies keep their own licenses in `Resources/invariant/node_modules`.
+- **Source code:** [github.com/mcarlucci/invariant](https://github.com/mcarlucci/invariant).

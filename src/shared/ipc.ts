@@ -17,6 +17,7 @@ import type {
   VersionInfo,
 } from "./types";
 import type { ProviderId } from "./providers";
+import type { InvariantBrowserReport, InvariantStatus, InvariantValidateResult } from "./invariant";
 import type { ConnectorInput, ConnectorView } from "./connectors";
 import type { TemplateInfo, TemplateSource, TemplateUpdate } from "./templates";
 
@@ -118,6 +119,20 @@ export interface InvokeChannels {
   "run:stop": { args: [string]; result: void };
   "run:restart": { args: [string, { reinstall?: boolean }?]; result: RunnerStatus };
   "run:status": { args: [string]; result: RunnerStatus };
+  /** Invariant UI: contract state for an app. */
+  "invariant:status": { args: [string]; result: InvariantStatus };
+  /** (Re)writes the app's config and compiles its contract. */
+  "invariant:compile": { args: [string]; result: InvariantStatus };
+  /** Validates the whole app source against the contract. */
+  "invariant:validate": { args: [string]; result: InvariantValidateResult };
+  /** Recompiles a design system's Invariant contract and hands it to the apps that use it. */
+  "invariant:compile-ds": { args: [string]; result: DesignSystem };
+  /** Playwright and Chromium are installed for browser checks. */
+  "invariant:browser-ready": { args: []; result: boolean };
+  /** Installs Playwright and Chromium for browser checks (once, for every app). */
+  "invariant:install-browser": { args: []; result: InvariantStatus["browserReady"] };
+  /** Runs Invariant's browser checks against the app's running dev server. */
+  "invariant:browser-run": { args: [string]; result: InvariantBrowserReport };
 }
 
 /** Main to renderer push events. */
@@ -131,6 +146,8 @@ export interface EventChannels {
   "app:preview-image": { appId: string };
   /** A step of a running design system import or re-import (install output, what is being read). */
   "ds:import-progress": { line: string };
+  /** Invariant UI finished something in the background (such as installing browser checks). */
+  "invariant:updated": { designSystemId?: string };
 }
 
 export type InvokeChannel = keyof InvokeChannels;
@@ -187,6 +204,13 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   "run:stop",
   "run:restart",
   "run:status",
+  "invariant:status",
+  "invariant:compile",
+  "invariant:validate",
+  "invariant:browser-run",
+  "invariant:install-browser",
+  "invariant:compile-ds",
+  "invariant:browser-ready",
 ];
 
 export const EVENT_CHANNELS: readonly EventChannel[] = [
@@ -197,6 +221,7 @@ export const EVENT_CHANNELS: readonly EventChannel[] = [
   "connectors:status",
   "app:preview-image",
   "ds:import-progress",
+  "invariant:updated",
 ];
 
 export interface AtelierApi {

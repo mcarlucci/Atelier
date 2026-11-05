@@ -53,6 +53,18 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Pinned: the bundled Invariant UI must not change between rebuilds of the same tag.
+      - name: Build Invariant UI
+        env:
+          INVARIANT_REF: 96566904616452f8c0f3463614477591b0235010
+        run: |
+          git clone https://github.com/mcarlucci/invariant.git "$RUNNER_TEMP/invariant"
+          git -C "$RUNNER_TEMP/invariant" checkout "$INVARIANT_REF"
+          cd "$RUNNER_TEMP/invariant"
+          npx -y pnpm@12.16.1 install --frozen-lockfile
+          npx -y pnpm@12.16.1 run build:npm
+      - name: Bundle Invariant UI
+        run: npm run fetch-invariant -- --from "$RUNNER_TEMP/invariant/dist-npm"
       - name: Bundle Node.js and git
         run: |
           for t in ${{ matrix.targets }}; do

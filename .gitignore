@@ -5,3 +5,5 @@ dist
 .DS_Store
 resources/node
 resources/git
+site/assets
+resources/invariant

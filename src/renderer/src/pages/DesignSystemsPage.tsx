@@ -3,10 +3,11 @@ import type { ComponentInfo, DesignSystem, FrameworkId } from "@shared/types";
 import { api, errorMessage } from "../api";
 import type { Route } from "../App";
 import { defaultTemplateFor, FRAMEWORK_LABELS, FRAMEWORK_PACKAGE, isCompatible, type TemplateInfo } from "@shared/templates";
+import DesignSystemGovernance from "../components/DesignSystemGovernance";
 import { Icon } from "../ui/icons";
 import { Alert, Checkbox, Progress, Select, TabPanel, Tabs, TextArea, TextField, ToggleGroup, toast, useConfirm } from "../ui/slab";
 
-export default function DesignSystemsPage({ selectedId, navigate }: { selectedId?: string; navigate(r: Route): void }) {
+export default function DesignSystemsPage({ selectedId, tab, navigate }: { selectedId?: string; tab?: string; navigate(r: Route): void }) {
   const [systems, setSystems] = useState<DesignSystem[]>([]);
   const refresh = () => api.invoke("ds:list").then(setSystems);
   useEffect(() => {
@@ -46,7 +47,8 @@ export default function DesignSystemsPage({ selectedId, navigate }: { selectedId
       <div className="detail-pane">
         {selected ? (
           <DesignSystemDetail
-            key={selected.id}
+            key={`${selected.id}:${tab ?? ""}`}
+            initialTab={tab}
             ds={selected}
             onChange={(ds) => setSystems((list) => list.map((x) => (x.id === ds.id ? ds : x)))}
             onDeleted={() => {
@@ -231,18 +233,18 @@ function DesignSystemDetail({
   ds,
   onChange,
   onDeleted,
+  initialTab,
 }: {
   ds: DesignSystem;
   onChange(ds: DesignSystem): void;
   onDeleted(): void;
+  initialTab?: string;
 }) {
-  const [tab, setTab] = useState("components");
+  const [tab, setTab] = useState(initialTab ?? "components");
   const [confirmNode, confirm] = useConfirm();
   const [filter, setFilter] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rules, setRules] = useState("");
-  const [guidelines, setGuidelines] = useState(ds.guidelines);
   const step = useImportProgress(busy);
   const [setupDraft, setSetupDraft] = useState(() => ({
     css: ds.setup.globalCss.join("\n"),
@@ -256,10 +258,6 @@ function DesignSystemDetail({
     pluginFactory: ds.setup.vuePlugin?.factory ?? false,
     modules: (ds.setup.angularModules ?? []).map((m) => `${m.importName} from ${m.importPath}`).join("\n"),
   }));
-
-  useEffect(() => {
-    if (tab === "prompt") void api.invoke("ds:preview-rules", ds.id).then(setRules);
-  }, [tab, ds]);
 
   const run = async (fn: () => Promise<DesignSystem | void>) => {
     setBusy(true);
@@ -343,8 +341,7 @@ function DesignSystemDetail({
           { id: "components", label: "Components" },
           { id: "setup", label: "Setup" },
           { id: "templates", label: "Templates" },
-          { id: "guidelines", label: "Guidelines" },
-          { id: "prompt", label: "AI rules preview" },
+          { id: "governance", label: "Governance" },
         ]}
       >
         <TabPanel name="components" className="panel-stack">
@@ -473,29 +470,8 @@ function DesignSystemDetail({
           <TemplatesTab ds={ds} onChange={onChange} />
         </TabPanel>
 
-        <TabPanel name="guidelines">
-        <section className="card form">
-          <p className="muted">
-            Usage rules from your design system team, sent verbatim with every request. Write them as you would for a new
-            engineer: when to use which component, layout conventions, content rules, accessibility requirements.
-          </p>
-          <TextArea label="Guidelines" hideLabel rows={16} value={guidelines} onValue={setGuidelines} />
-          <div>
-            <button className="primary" disabled={busy || guidelines === ds.guidelines} onClick={() => run(() => api.invoke("ds:update", ds.id, { guidelines }))}>
-              Save guidelines
-            </button>
-          </div>
-        </section>
-        </TabPanel>
-
-        <TabPanel name="prompt">
-        <section className="card">
-          <p className="muted">
-            Exactly what the model receives about this design system ({Math.round(rules.length / 4).toLocaleString()} tokens,
-            roughly). It is cached between turns.
-          </p>
-          <pre className="code">{rules}</pre>
-        </section>
+        <TabPanel name="governance">
+          <DesignSystemGovernance ds={ds} onChange={onChange} />
         </TabPanel>
       </Tabs>
     </div>

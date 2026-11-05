@@ -13,7 +13,8 @@
     "test": "vitest run",
     "fetch-node": "node scripts/fetch-node.ts",
     "dist": "electron-vite build && electron-builder --publish never",
-    "fetch-git": "node scripts/fetch-git.ts"
+    "fetch-git": "node scripts/fetch-git.ts",
+    "fetch-invariant": "node scripts/fetch-invariant.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",
@@ -38,6 +39,12 @@
     "vitest": "^4.0.0"
   },
   "build": {
+    "extraResources": [
+      {
+        "from": "resources/invariant",
+        "to": "invariant"
+      }
+    ],
     "appId": "dev.atelier.app",
     "productName": "Atelier",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",

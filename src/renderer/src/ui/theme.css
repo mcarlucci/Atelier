@@ -195,6 +195,25 @@ slab-checkbox::part(checkbox) {
   background: var(--bg);
   display: grid;
   place-items: center;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* The native input stays for keyboard, clicks and screen readers, but draws nothing: the box above is the visual. */
+slab-checkbox::part(input) {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
 }
 
 slab-checkbox:state(checked)::part(checkbox) {

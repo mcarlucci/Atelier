@@ -62,8 +62,7 @@ export default function PromptBox(props: {
         }}
       />
       <div className="prompt-foot">
-        {props.footer}
-        <div className="spacer" />
+        <div className="prompt-chips">{props.footer}</div>
         <span className="prompt-hint muted small">⇧↵ new line</span>
         {props.busy && props.onStop ? (
           <button className="send-btn stop" aria-label="Stop generating" title="Stop" onClick={props.onStop}>

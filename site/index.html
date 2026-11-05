@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atelier: prototype in your design system</title>
+  <meta name="description" content="Describe a screen. Atelier builds it from your real design system components, locally. No account, no server, plain git repo.">
+  <meta property="og:title" content="Atelier: prototype in your design system">
+  <meta property="og:description" content="Describe a screen. Atelier builds it from your real components, locally.">
+  <meta property="og:image" content="https://mcarlucci.github.io/Atelier/assets/build.gif">
+  <meta name="theme-color" content="#080a11">
+  <link rel="icon" href="assets/atelier-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <img src="assets/atelier-wordmark-dark.svg" alt="Atelier">
+      <div class="links">
+        <a href="#why">Why</a>
+        <a href="#how">How</a>
+        <a href="#trust">Trust</a>
+        <a href="https://github.com/mcarlucci/Atelier">GitHub</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <!-- <span class="eyebrow">Bring your own design system</span> -->
+      <h1>Prototype in your design system. <em>Not around it.</em></h1>
+      <p class="sub">Add your design system. Describe a screen. Get a real running prototype with your real components.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/mcarlucci/Atelier/releases/latest">Download</a>
+        <a class="btn" href="https://github.com/mcarlucci/Atelier">View on GitHub</a>
+      </div>
+      <div class="frame">
+        <img src="assets/build.gif" alt="Atelier building a support inbox from Radix Themes components" width="1040">
+      </div>
+    </header>
+
+    <section id="why">
+      <h2>The old way costs you twice.</h2>
+      <p class="lede">Once to prototype it. Again to rebuild it.</p>
+      <div class="pairs">
+        <div class="pair">
+          <div class="pain"><b>Before</b><p>AI builders ship generic UI. Engineers rebuild every screen.</p></div>
+          <div class="fix"><b>With Atelier</b><p>Every screen uses only your components. A built-in check flags anything off-system.</p></div>
+        </div>
+        <div class="pair">
+          <div class="pain"><b>Before</b><p>Mockups look right, but nothing works. Handoff is a guessing game.</p></div>
+          <div class="fix"><b>With Atelier</b><p>Live apps with real navigation and state. Hand off a plain git repo with readable code.</p></div>
+        </div>
+        <div class="pair">
+          <div class="pain"><b>Before</b><p>Your designs and keys sit on someone else's server.</p></div>
+          <div class="fix"><b>With Atelier</b><p>Runs on your machine. No account, no Atelier server. Keys stay in your OS keychain.</p></div>
+        </div>
+        <div class="pair">
+          <div class="pain"><b>Before</b><p>Tweak one button, regenerate the whole screen.</p></div>
+          <div class="fix"><b>With Atelier</b><p>Click an element, change just that. Every change is a version you can restore.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="importer">
+      <h2>Other tools can't read your design system. Atelier can.</h2>
+      <p class="lede">Most AI builders never see your components. They guess from screenshots, ask you to paste docs, or make you rebuild everything in their own kit. The result looks close and ships wrong.</p>
+      <div class="pairs">
+        <div class="pair">
+          <div class="pain"><b>Other tools</b><p>Hand-written prompts. Pasted docs. Components rebuilt in a proprietary kit.</p></div>
+          <div class="fix"><b>Atelier</b><p>Point at your npm package or local folder. The importer reads it for you.</p></div>
+        </div>
+      </div>
+      <div class="trust importer">
+        <div><h3>Reads your real types</h3><p>Parses your TypeScript declarations. Gets every component, prop, event, required flag and compound part (<code>Dialog.Root</code>). React, Vue and Angular.</p></div>
+        <div><h3>Finds the wiring</h3><p>Detects your global stylesheet, theme provider and CSS-variable tokens. Known libraries like Vuetify, PrimeVue and Angular Material are set up automatically.</p></div>
+        <div><h3>Adds your intent</h3><p>Drop in an optional <code>atelier.manifest.json</code> with guidelines, examples and per-component on/off switches. Experimental components import switched off.</p></div>
+      </div>
+      <div class="mcp">
+        <div>
+          <span class="badge">Coming soon</span>
+          <h3>Export it as an MCP server.</h3>
+          <p>The same machine-readable design system, available to any AI chat tool that speaks MCP. Import once. Use it everywhere.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <h2>From idea to repo in four steps.</h2>
+      <p class="lede">No setup. Atelier ships its own Node.js and git.</p>
+      <div class="steps">
+        <div class="step"><h3>Import</h3><p>Point at an npm package, public or private, or a local folder.</p></div>
+        <div class="step"><h3>Describe</h3><p>Say what you want. Get a running starter app.</p></div>
+        <div class="step"><h3>Refine</h3><p>Chat, edit in the live preview, or open the code.</p></div>
+        <div class="step"><h3>Hand off</h3><p>Give engineers the git repo. History included.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Edit the way you think.</h2>
+      <p class="lede">Point at the thing. Change the thing.</p>
+      <div class="demos">
+        <figure>
+          <div class="frame"><img src="assets/select-and-edit.gif" alt="Selecting an element and editing its text in place" loading="lazy"></div>
+          <figcaption><b>Select and edit.</b> Click to select, double-click text to rewrite it.</figcaption>
+        </figure>
+        <figure>
+          <div class="frame"><img src="assets/ask-ai.gif" alt="Asking AI to change one selected element" loading="lazy"></div>
+          <figcaption><b>Ask AI about one element.</b> Only that element changes.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Works with your stack.</h2>
+      <p class="lede">Any npm design system with TypeScript types. Any model you trust.</p>
+      <div class="stack">
+        <div>
+          <h3>Frameworks</h3>
+          <div class="chips"><span>React</span><span>Vue 3</span><span>Angular 17&ndash;22</span></div>
+        </div>
+        <div>
+          <h3>Design systems</h3>
+          <div class="chips"><span>Radix Themes</span><span>MUI</span><span>Mantine</span><span>Vuetify</span><span>PrimeVue</span><span>Element Plus</span><span>PrimeNG</span><span>Angular Material</span><span>Your own</span></div>
+        </div>
+        <div>
+          <h3>Models</h3>
+          <div class="chips"><span>Claude</span><span>Ollama</span><span>LM Studio</span><span>OpenRouter</span><span>Groq</span><span>Gemini</span><span>Mistral</span><span>Any OpenAI-compatible</span></div>
+        </div>
+        <div>
+          <h3>Connectors</h3>
+          <div class="chips"><span>Figma</span><span>Storybook</span><span>Any MCP server</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="governance">
+      <h2>Governed by a contract, not a prompt.</h2>
+      <p class="lede">Atelier bundles <a href="https://invariantui.com">Invariant UI</a>, so a prototype follows your design system's rules and approved patterns.</p>
+      <div class="trust">
+        <div><h3>The AI reads the rules</h3><p>Components, tokens and approved UX patterns are served to the model while it builds.</p></div>
+        <div><h3>Every turn is checked</h3><p>Generated code is validated against the contract. Findings show in the chat and the Governance tab.</p></div>
+        <div><h3>Honest results</h3><p>Checks that can't be verified are reported as such, never counted as passes.</p></div>
+        <div><h3>Local and deterministic</h3><p>No account, no cloud. The same sources always give the same contract.</p></div>
+      </div>
+    </section>
+
+    <section id="trust">
+      <h2>Built to be trusted.</h2>
+      <p class="lede">Your work stays yours.</p>
+      <div class="trust">
+        <div><h3>Local-first</h3><p>No Atelier account. No Atelier server. Your code never leaves your machine unless you send it to a model you chose.</p></div>
+        <div><h3>Open to inspect</h3><p>Source-available under FSL-1.1-MIT. Every version becomes MIT after two years.</p></div>
+        <div><h3>Sandboxed AI</h3><p>The AI writes only inside the app's folder. Package names are checked before anything installs.</p></div>
+        <div><h3>Encrypted secrets</h3><p>API keys and registry tokens live in your OS keychain.</p></div>
+        <div><h3>Plain git</h3><p>Every app is a normal repo. Leave any time, nothing to export.</p></div>
+        <div><h3>Read the details</h3><p><a href="https://github.com/mcarlucci/Atelier/blob/main/docs/security.md">Security notes</a> and the <a href="https://github.com/mcarlucci/Atelier/blob/main/CHANGELOG.md">changelog</a> are public.</p></div>
+      </div>
+    </section>
+
+    <section class="final">
+      <h2>Ship the prototype. Skip the rebuild.</h2>
+      <p class="lede" style="margin-left:auto;margin-right:auto">macOS, Windows and Linux. Free to download.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/mcarlucci/Atelier/releases/latest">Download Atelier</a>
+        <a class="btn" href="https://github.com/mcarlucci/Atelier#readme">Read the docs</a>
+      </div>
+      <p class="note">Early release: builds are not code-signed yet. On macOS, if Gatekeeper blocks the app, run <code>xattr -dr com.apple.quarantine /Applications/Atelier.app</code>. On Windows, choose More info, then Run anyway.</p>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>&copy; Atelier &middot; FSL-1.1-MIT</span>
+      <span>
+        <a href="https://github.com/mcarlucci/Atelier">GitHub</a>
+        <a href="https://github.com/mcarlucci/Atelier/releases">Releases</a>
+        <a href="https://github.com/mcarlucci/Atelier/blob/main/LICENSE">License</a>
+      </span>
+    </div>
+  </footer>
+</body>
+</html>

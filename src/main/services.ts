@@ -23,7 +23,8 @@ import { checkCompliance } from "./chat/compliance";
 import { readAppNotes, snapshotCodebase } from "./chat/context";
 import { DEFAULT_MODEL } from "./chat/llm";
 import { describeProviderError, listModels, streamTurn, type ChatTurn, type ProviderTarget } from "./chat/providers";
-import { BASE_PROMPT, connectorsPrompt } from "./chat/prompt";
+import { BASE_PROMPT, connectorsPrompt, invariantPrompt } from "./chat/prompt";
+import { mergeToolsets, openInvariantToolset, type InvariantToolset } from "./invariant/mcp";
 import { importDesignSystem, npmEnv, npmrcFor } from "./design-system/importer";
 import { buildDesignSystemRules } from "./design-system/rules";
 import { writeFile } from "./templates";
@@ -34,6 +35,9 @@ import { AppRunner, type RunTarget } from "./runner";
 import { NodeRuntimes } from "./node/runtimes";
 import type { FetchFn } from "./node/dist";
 import { ConnectorService } from "./connectors/service";
+import { InvariantRunner, OUTPUT_DIR } from "./invariant/runner";
+import type { InvariantBrowserReport, InvariantStatus, InvariantValidateResult } from "@shared/invariant";
+import type { ComplianceIssue } from "@shared/types";
 import { sanitizeSelection, selectionPrompt } from "./preview/selection";
 import { editsPrompt, planTextEdits, sanitizeEdits, writePlannedEdits } from "./preview/edits";
 import { newId, Store } from "./store";
@@ -53,6 +57,10 @@ export interface ServiceDeps {
   fetch?: FetchFn;
   /** Node.js builds shipped with the app, if any. */
   bundledNodeDir?: string;
+  /** Don't install Playwright after a design system import. Tests set it to stay off the network. */
+  skipBrowserInstall?: boolean;
+  /** The invariant-ui package shipped with the app (resources/invariant), if any. */
+  bundledInvariantDir?: string;
   /** nodejs.org/dist mirror for networks that block nodejs.org. */
   nodeMirror?: string;
   /** Screenshots a running dev server as a JPEG. Absent in tests. */
@@ -71,6 +79,7 @@ export class Services {
   readonly connectors: ConnectorService;
   readonly templates: TemplateService;
   readonly node: NodeRuntimes;
+  readonly invariant: InvariantRunner;
   private inflight = new Map<string, AbortController>();
   private readonly previewsDir: string;
   private previewTimers = new Map<string, NodeJS.Timeout>();
@@ -88,6 +97,11 @@ export class Services {
       cacheDir: path.join(deps.userDataDir, "node"),
       fetchFn: deps.fetch ?? ((url) => fetch(url)),
       mirror: deps.nodeMirror,
+    });
+    this.invariant = new InvariantRunner({
+      toolDir: path.join(deps.userDataDir, "invariant"),
+      bundledDir: deps.bundledInvariantDir,
+      node: () => this.node.resolve([]),
     });
     this.templates = new TemplateService(this.store, path.join(deps.userDataDir, "templates"));
     this.connectors = new ConnectorService({
@@ -270,7 +284,8 @@ export class Services {
       encryptedAuthToken: input.authToken ? await this.deps.secrets.encrypt(input.authToken) : undefined,
     };
     this.store.update((d) => d.designSystems.push(stored));
-    return publicDs(stored);
+    await this.setupGovernance(id);
+    return publicDs(this.storedDs(id));
   }
 
   /** Re-reads the package (for example after a new release) and keeps team-authored edits. */
@@ -294,7 +309,9 @@ export class Services {
       node: await this.node.resolve([]),
       onLog: (line) => this.deps.emit("ds:import-progress", { line }),
     });
-    return this.replaceDs({ ...fresh, defaultTemplateId: current.defaultTemplateId, encryptedAuthToken: current.encryptedAuthToken });
+    this.replaceDs({ ...fresh, defaultTemplateId: current.defaultTemplateId, encryptedAuthToken: current.encryptedAuthToken });
+    await this.setupGovernance(id);
+    return publicDs(this.storedDs(id));
   }
 
   updateDesignSystem(
@@ -391,6 +408,7 @@ export class Services {
       updatedAt: now,
     };
     this.store.update((d) => d.apps.push(app));
+    this.adoptDsContract(app);
     return warnings.length ? { ...app, warnings } : app;
   }
 
@@ -445,6 +463,157 @@ export class Services {
         void this.capturePreview(appId);
       }, PREVIEW_CAPTURE_DELAY_MS),
     );
+  }
+
+  // ------------------------------------------------------------ Invariant UI
+
+  private invariantMarker(appDir: string): string {
+    return path.join(appDir, OUTPUT_DIR, ".atelier-compile.json");
+  }
+
+  /** Components in the app's compiled contract; 0 when it was never compiled or matched nothing. */
+  private invariantComponents(appDir: string): number {
+    try {
+      return (JSON.parse(fs.readFileSync(this.invariantMarker(appDir), "utf8")) as { components: number }).components;
+    } catch {
+      return 0;
+    }
+  }
+
+  private dsWorkDir(id: string): string {
+    return path.join(this.deps.userDataDir, "design-systems", id);
+  }
+
+  /**
+   * After an import: compiles the design system's contract in its install folder, where the package sits in
+   * node_modules, and starts installing Playwright for browser checks in the background. Problems are
+   * recorded on the design system and never fail the import.
+   */
+  private async setupGovernance(id: string): Promise<void> {
+    await this.compileDesignSystem(id);
+    if (this.deps.skipBrowserInstall) return;
+    void this.invariant
+      .installPlaywright((line) => this.deps.emit("ds:import-progress", { line }))
+      .then(() => this.deps.emit("invariant:updated", { designSystemId: id }))
+      .catch(() => {});
+  }
+
+  /** Recompiles a design system's contract and gives it to the apps that use the shared one. */
+  async recompileDesignSystem(id: string): Promise<DesignSystem> {
+    await this.compileDesignSystem(id);
+    return publicDs(this.storedDs(id));
+  }
+
+  invariantBrowserReady(): boolean {
+    return this.invariant.playwrightReady();
+  }
+
+  private async compileDesignSystem(id: string): Promise<void> {
+    const ds = this.storedDs(id);
+    let info: NonNullable<DesignSystem["invariant"]>;
+    try {
+      if (ds.framework !== "react" && ds.framework !== "vue" && ds.framework !== "angular") throw new Error(`Invariant UI does not support ${ds.framework}.`);
+      const dir = this.dsWorkDir(id);
+      this.invariant.writeConfig(dir, { packageName: ds.packageName, framework: ds.framework }, ds.name);
+      const counts = await this.invariant.compile(dir);
+      info = { components: counts.components, compiledAt: Date.now() };
+    } catch (err) {
+      info = { components: 0, compiledAt: Date.now(), error: err instanceof Error ? err.message.split("\n")[0] : String(err) };
+    }
+    this.replaceDs({ ...this.storedDs(id), invariant: info });
+    for (const app of this.store.get().apps.filter((a) => a.designSystemId === id)) this.adoptDsContract(app);
+  }
+
+  /** Gives an app the design system's compiled contract, unless the user compiled the app's own. */
+  private adoptDsContract(app: AppRecord): void {
+    const ds = this.store.get().designSystems.find((d) => d.id === app.designSystemId);
+    const compiled = ds?.invariant;
+    if (!ds || !compiled?.components) return;
+    let marker: { fromDs?: number } | undefined;
+    try {
+      marker = JSON.parse(fs.readFileSync(this.invariantMarker(app.path), "utf8")) as { fromDs?: number };
+    } catch {
+      marker = undefined;
+    }
+    if (marker && (marker.fromDs === undefined || marker.fromDs === compiled.compiledAt)) return;
+    const from = path.join(this.dsWorkDir(ds.id), OUTPUT_DIR);
+    if (!fs.existsSync(from)) return;
+    const to = path.join(app.path, OUTPUT_DIR);
+    try {
+      fs.rmSync(to, { recursive: true, force: true });
+      fs.mkdirSync(path.dirname(to), { recursive: true });
+      fs.cpSync(from, to, { recursive: true });
+      if (ds.framework === "react" || ds.framework === "vue" || ds.framework === "angular") {
+        this.invariant.writeConfig(app.path, { packageName: ds.packageName, framework: ds.framework }, app.name);
+      }
+      fs.writeFileSync(this.invariantMarker(app.path), `${JSON.stringify({ components: compiled.components, tokens: 0, fromDs: compiled.compiledAt })}\n`);
+    } catch {
+      // The app can still compile its own contract from the Governance tab.
+    }
+  }
+
+  async invariantInstallBrowser(): Promise<boolean> {
+    await this.invariant.installPlaywright((line) => this.deps.emit("ds:import-progress", { line }));
+    this.deps.emit("invariant:updated", {});
+    return true;
+  }
+
+  invariantStatus(appId: string): InvariantStatus {
+    const app = this.app(appId);
+    this.adoptDsContract(app);
+    const version = this.invariant.version();
+    const components = this.invariantComponents(app.path);
+    const browserReady = this.invariant.playwrightReady() || fs.existsSync(path.join(app.path, "node_modules", "playwright"));
+    return {
+      installed: Boolean(version),
+      version,
+      compiled: components > 0,
+      browserReady,
+      ...(fs.existsSync(this.invariantMarker(app.path)) && components === 0
+        ? { message: "Invariant found no components in the design system package, so it has no contract to check against. Install the app's dependencies, then compile again." }
+        : {}),
+    };
+  }
+
+  async invariantCompile(appId: string): Promise<InvariantStatus> {
+    const app = this.app(appId);
+    const ds = this.getDesignSystem(app.designSystemId);
+    if (ds.framework !== "react" && ds.framework !== "vue" && ds.framework !== "angular") throw new Error(`Invariant UI does not support ${ds.framework}.`);
+    this.invariant.writeConfig(app.path, { packageName: ds.packageName, framework: ds.framework }, app.name);
+    const counts = await this.invariant.compile(app.path);
+    fs.mkdirSync(path.dirname(this.invariantMarker(app.path)), { recursive: true });
+    fs.writeFileSync(this.invariantMarker(app.path), `${JSON.stringify(counts)}\n`);
+    return this.invariantStatus(appId);
+  }
+
+  async invariantValidate(appId: string): Promise<InvariantValidateResult> {
+    const app = this.app(appId);
+    this.adoptDsContract(app);
+    if (!this.invariantComponents(app.path)) throw new Error("Compile the Invariant contract first.");
+    return this.invariant.validate(app.path, ["src"]);
+  }
+
+  async invariantBrowserRun(appId: string): Promise<InvariantBrowserReport> {
+    const app = this.app(appId);
+    const status = this.runner.status(appId);
+    if (status.state !== "running" || !status.url) throw new Error("Start the app first; browser checks run against its dev server.");
+    return this.invariant.browserRun(app.path, status.url);
+  }
+
+  /** Invariant findings for files a turn wrote. Empty when the app has no usable contract. */
+  private async invariantIssues(appDir: string, files: string[], extensions: string[]): Promise<ComplianceIssue[]> {
+    const checkable = files.filter((f) => [...extensions, ".vue", ".html"].includes(path.extname(f)));
+    if (checkable.length === 0 || !this.invariantComponents(appDir)) return [];
+    const result = await this.invariant.validate(appDir, checkable);
+    return result.violations.map((v) => ({
+      file: v.file,
+      line: v.line ?? 1,
+      rule: v.code,
+      message: v.message,
+      source: "invariant" as const,
+      severity: v.severity,
+      ...(v.suggestion ? { suggestion: v.suggestion } : {}),
+    }));
   }
 
   private async capturePreview(appId: string): Promise<void> {
@@ -616,12 +785,21 @@ export class Services {
 
     const controller = new AbortController();
     this.inflight.set(chat.id, controller);
+    let invariantTools: InvariantToolset | undefined;
     try {
       const snapshot = await snapshotCodebase(app.path);
       const notes = readAppNotes(app.path);
       const connectors = await this.connectors.toolsetFor(ds.id);
       if (connectors.warnings.length) assistant.warnings = connectors.warnings;
-      const system = `${BASE_PROMPT}\n\n${buildDesignSystemRules(ds, template)}${connectors.toolset ? `\n\n${connectorsPrompt(connectors.connectors)}` : ""}`;
+      this.adoptDsContract(app);
+      if (this.invariantComponents(app.path)) {
+        try {
+          invariantTools = await openInvariantToolset(await this.invariant.mcpCommand(app.path));
+        } catch (err) {
+          assistant.warnings = [...(assistant.warnings ?? []), `Invariant UI tools unavailable: ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`];
+        }
+      }
+      const system = `${BASE_PROMPT}\n\n${buildDesignSystemRules(ds, template)}${connectors.toolset ? `\n\n${connectorsPrompt(connectors.connectors)}` : ""}${invariantTools ? `\n\n${invariantPrompt()}` : ""}`;
       const messages: ChatTurn[] = [
         ...history.map((m) => ({
           role: m.role,
@@ -641,7 +819,7 @@ export class Services {
       const result = await streamTurn(target, {
         system,
         messages,
-        toolset: connectors.toolset,
+        toolset: mergeToolsets(connectors.toolset, invariantTools?.toolset),
         signal: controller.signal,
         onText: (text) => {
           assistant.content += text;
@@ -664,6 +842,11 @@ export class Services {
         }
         const changed = [...applied.written, ...applied.renamed.map((r) => r.to)];
         const compliance = checkCompliance(app.path, changed, ds, template.kit.sourceExtensions);
+        try {
+          compliance.push(...(await this.invariantIssues(app.path, changed, template.kit.sourceExtensions)));
+        } catch (err) {
+          assistant.warnings = [...(assistant.warnings ?? []), `Invariant UI check skipped: ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`];
+        }
         const commitHash =
           (await gitCommitAll(app.path, parsed.summary ?? input.prompt.slice(0, 72)).catch((err: Error) => {
             applied.errors.push(`Commit failed: ${err.message}`);
@@ -699,6 +882,7 @@ export class Services {
       }
     } finally {
       this.inflight.delete(chat.id);
+      await invariantTools?.close();
     }
     this.store.update((d) => d.messages.push(assistant));
     this.deps.emit("chat:done", { chatId: chat.id, message: assistant });

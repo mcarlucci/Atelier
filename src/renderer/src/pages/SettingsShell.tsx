@@ -39,6 +39,7 @@ export default function SettingsShell({
   }, [route.page]);
 
   const selectedId = "selectedId" in route ? route.selectedId : undefined;
+  const dsTab = route.page === "design-systems" ? route.tab : undefined;
   return (
     <div className="settings-shell">
       <h1 className="settings-title">Settings</h1>
@@ -60,7 +61,7 @@ export default function SettingsShell({
               (t.id === "settings" ? (
                 <SettingsPage onChange={onSettings} />
               ) : t.id === "design-systems" ? (
-                <DesignSystemsPage selectedId={selectedId} navigate={navigate} />
+                <DesignSystemsPage selectedId={selectedId} tab={dsTab} navigate={navigate} />
               ) : t.id === "templates" ? (
                 <TemplatesPage selectedId={selectedId} navigate={navigate} />
               ) : (

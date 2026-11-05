@@ -13,7 +13,7 @@ import { Menu, MenuItem, TextField, ToastHost, Tooltip } from "./ui/slab";
 export type Route =
   | { page: "apps" }
   | { page: "workspace"; appId: string; initialPrompt?: string }
-  | { page: "design-systems"; selectedId?: string }
+  | { page: "design-systems"; selectedId?: string; tab?: string }
   | { page: "connectors"; selectedId?: string }
   | { page: "templates"; selectedId?: string }
   | { page: "settings" };

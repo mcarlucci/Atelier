@@ -88,6 +88,8 @@ export interface DesignSystem {
   peerDependencies?: Record<string, string>;
   /** Template that new apps with this design system start from. */
   defaultTemplateId?: string;
+  /** The Invariant UI contract compiled when the design system was imported. */
+  invariant?: { components: number; compiledAt: number; error?: string };
 }
 
 export interface DesignSystemManifestOverride {
@@ -137,8 +139,13 @@ export interface ActionSummary {
 export interface ComplianceIssue {
   file: string;
   line: number;
-  rule: "foreign-ui-library" | "native-element" | "unknown-ds-export";
+  /** Atelier's own rules, or an Invariant UI rule code. */
+  rule: "foreign-ui-library" | "native-element" | "unknown-ds-export" | (string & {});
   message: string;
+  /** Absent for Atelier's own checks. */
+  source?: "invariant";
+  severity?: "error" | "warning" | "info";
+  suggestion?: string;
 }
 
 /** An element picked in the preview with the selection tool. Comes from the app page, so it is untrusted. */

@@ -8,6 +8,7 @@ import type { Route } from "../App";
 import AppAvatar from "../components/AppAvatar";
 import AppNameInput from "../components/AppNameInput";
 import MessageView, { ThinkingDots } from "../components/MessageView";
+import ChecksPanel from "../components/ChecksPanel";
 import ModelMenu from "../components/ModelMenu";
 import SelectionChip from "../components/SelectionChip";
 import PromptBox from "../components/PromptBox";
@@ -24,6 +25,7 @@ const tabLabel = (icon: IconName, text: string) => (
 const TABS = [
   { id: "preview", label: tabLabel("eye", "Preview") },
   { id: "code", label: tabLabel("code", "Code") },
+  { id: "checks", label: tabLabel("check", "Checks") },
   { id: "versions", label: tabLabel("history", "Versions") },
 ];
 const DEVICES = { desktop: "100%", tablet: "768px", mobile: "390px" } as const;
@@ -142,6 +144,17 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
             )}
             <span className="muted small truncate">{currentChat?.title ?? "New chat"}</span>
           </div>
+          {ds && (
+            <Tooltip label={`${ds.name} · ${ds.components.filter((c) => c.enabled).length} components from ${ds.packageName}`}>
+              <button
+                className="icon-btn"
+                aria-label={`Open the ${ds.name} design system`}
+                onClick={() => navigate({ page: "design-systems", selectedId: app.designSystemId })}
+              >
+                <Icon name="palette" />
+              </button>
+            </Tooltip>
+          )}
           {chats.length > 0 && (
             <Menu
               label="Chat history"
@@ -231,6 +244,14 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
           </TabPanel>
           <TabPanel name="code" className="tab-body">
             <CodeView appId={appId} refreshKey={versionsKey} />
+          </TabPanel>
+          <TabPanel name="checks" className="tab-body">
+            <ChecksPanel
+              appId={appId}
+              ds={ds}
+              refreshKey={versionsKey}
+              onOpenGovernance={() => app && navigate({ page: "design-systems", selectedId: app.designSystemId, tab: "governance" })}
+            />
           </TabPanel>
           <TabPanel name="versions" className="tab-body">
             <VersionsView appId={appId} refreshKey={versionsKey} onRestored={() => setVersionsKey((k) => k + 1)} />
@@ -748,10 +769,6 @@ function ChatPanel({
                 <Icon name="plug" size={13} />
                 {activeConnectors.length ? activeConnectors.length : "Connect"}
               </button>
-              <span className="chip-static" title={`${enabled} components from ${ds.packageName}`}>
-                <Icon name="palette" size={13} />
-                {ds.name}
-              </span>
             </>
           }
         />

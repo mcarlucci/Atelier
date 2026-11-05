@@ -192,6 +192,13 @@ function registerHandlers(services: Services): void {
     "run:stop": (id) => services.runner.stop(id),
     "run:restart": (id, opts) => services.restartApp(id, opts ?? {}),
     "run:status": (id) => services.runner.status(id),
+    "invariant:status": (id) => services.invariantStatus(id),
+    "invariant:compile": (id) => services.invariantCompile(id),
+    "invariant:validate": (id) => services.invariantValidate(id),
+    "invariant:browser-run": (id) => services.invariantBrowserRun(id),
+    "invariant:install-browser": () => services.invariantInstallBrowser(),
+    "invariant:compile-ds": (id) => services.recompileDesignSystem(id),
+    "invariant:browser-ready": () => services.invariantBrowserReady(),
   };
 
   for (const channel of INVOKE_CHANNELS) {
@@ -224,6 +231,8 @@ app.whenReady().then(() => {
     fetch: (url) => net.fetch(url),
     // Packaging copies resources/node into the app's Resources folder (package.json "extraResources").
     bundledNodeDir: app.isPackaged ? path.join(process.resourcesPath, "node") : path.join(app.getAppPath(), "resources/node"),
+    // Packaging copies resources/invariant the same way.
+    bundledInvariantDir: app.isPackaged ? path.join(process.resourcesPath, "invariant") : path.join(app.getAppPath(), "resources/invariant"),
     nodeMirror: process.env.ATELIER_NODE_MIRROR,
     openExternal: (url) => {
       if (/^https?:\/\//.test(url)) void shell.openExternal(url);

@@ -213,6 +213,7 @@ export default function MessageView({
                   {c.file}:{c.line}
                 </code>{" "}
                 {c.message}
+                {c.source === "invariant" && <span className="muted small"> (Invariant UI)</span>}
               </li>
             ))}
           </ul>

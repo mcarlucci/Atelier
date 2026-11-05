@@ -218,8 +218,7 @@ button.ghost {
   color: var(--text);
 }
 
-.chip-btn,
-.chip-static {
+.chip-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -236,13 +235,6 @@ button.ghost {
 
 .chip-btn:hover:not(:disabled) {
   color: var(--text);
-}
-
-.chip-static {
-  border-style: dashed;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .icon {
@@ -736,17 +728,50 @@ details.advanced[open] > summary {
 
 .prompt-foot {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 6px;
   cursor: default;
 }
 
+/* Chips wrap onto more rows in a narrow pane instead of being crushed beside the send button. */
+.prompt-chips {
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+.prompt-chips > * {
+  flex: none;
+  max-inline-size: 100%;
+}
+
+.prompt-foot > .prompt-hint,
+.prompt-foot > .send-btn {
+  align-self: flex-end;
+}
+
+/* Lines up with the middle of the 32px send button when the chips wrap above it. */
+.prompt-foot > .prompt-hint {
+  margin-block-end: 6px;
+}
+
 .prompt-hint {
   margin-right: 4px;
+  /* Gives way first when the pane is narrow, so the send button keeps its size. */
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .send-btn {
+  /* Never shrinks with the pane: a flex item would squeeze into an oval. */
+  flex: none;
   inline-size: 32px;
+  min-inline-size: 32px;
   block-size: 32px;
   min-block-size: 32px;
   padding: 0;
@@ -1417,6 +1442,12 @@ body.resizing iframe {
   color: var(--ok);
   border-color: color-mix(in srgb, var(--ok) 35%, var(--border));
   background: color-mix(in srgb, var(--ok) 7%, var(--bg));
+}
+
+.meta-pill.bad {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  background: color-mix(in srgb, var(--danger) 7%, var(--bg));
 }
 
 .composer {
@@ -2244,4 +2275,31 @@ slab-disclosure.files-disclosure::part(summary) {
   inline-size: 22px;
   block-size: 22px;
   min-block-size: 22px;
+}
+
+.governance {
+  background: var(--bg);
+}
+
+.governance section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.governance-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.governance-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }

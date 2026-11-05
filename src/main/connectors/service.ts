@@ -313,7 +313,7 @@ function uniqueName(name: string, taken: Map<string, unknown>): string {
 }
 
 /** Providers require an object schema at the top level. */
-function normalizeSchema(schema: Record<string, unknown>): Record<string, unknown> {
+export function normalizeSchema(schema: Record<string, unknown>): Record<string, unknown> {
   if (schema && schema.type === "object") return { properties: {}, ...schema };
   return { type: "object", properties: {} };
 }

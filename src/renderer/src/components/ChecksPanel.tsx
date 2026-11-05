@@ -1,0 +1,148 @@
+import { useCallback, useEffect, useState } from "react";
+import type { InvariantBrowserReport, InvariantStatus, InvariantValidateResult } from "@shared/invariant";
+import type { DesignSystem } from "@shared/types";
+import { api, errorMessage } from "../api";
+import { Alert } from "../ui/slab";
+
+type Busy = "validate" | "browser" | null;
+
+/**
+ * Invariant UI checks for one app: code checks against the design system's contract, and browser checks against
+ * the running preview. The contract itself lives on the design system's Governance tab.
+ */
+export default function ChecksPanel({
+  appId,
+  ds,
+  refreshKey,
+  onOpenGovernance,
+}: {
+  appId: string;
+  ds?: DesignSystem;
+  refreshKey: number;
+  onOpenGovernance(): void;
+}) {
+  const [status, setStatus] = useState<InvariantStatus>();
+  const [result, setResult] = useState<InvariantValidateResult>();
+  const [browser, setBrowser] = useState<InvariantBrowserReport>();
+  const [busy, setBusy] = useState<Busy>(null);
+  const [error, setError] = useState<string>();
+
+  const load = useCallback(async () => {
+    try {
+      setStatus(await api.invoke("invariant:status", appId));
+    } catch (e) {
+      setError(errorMessage(e));
+    }
+  }, [appId]);
+  useEffect(() => api.on("invariant:updated", () => void load()), [load]);
+  useEffect(() => {
+    setResult(undefined);
+    setBrowser(undefined);
+    void load();
+  }, [load, refreshKey]);
+
+  const run = async (kind: Exclude<Busy, null>, work: () => Promise<void>) => {
+    setBusy(kind);
+    setError(undefined);
+    try {
+      await work();
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const governanceLink = (label: string) => (
+    <button className="link" onClick={onOpenGovernance}>
+      {label}
+    </button>
+  );
+  const pr = result?.summary.patternRules;
+  return (
+    <div className="page-scroll governance">
+      <div>
+        <h2>Checks</h2>
+        <p className="muted small">
+          Checks this app against {ds ? `${ds.name}'s` : "its design system's"} contract with{" "}
+          <a href="https://invariantui.com" target="_blank" rel="noreferrer">
+            Invariant UI
+          </a>
+          {status?.version ? ` ${status.version}` : ""}. Results that can't be verified are never counted as passes.{" "}
+          {governanceLink("Open governance")}
+        </p>
+      </div>
+      {error && <Alert tone="danger">{error}</Alert>}
+      {status && !status.installed && <Alert tone="warning">Invariant UI isn't bundled with this build.</Alert>}
+      {status && status.installed && !status.compiled && (
+        <Alert tone="warning">
+          This app has no contract to check against yet. {status.message ?? "Compile the design system's contract from its Governance tab."}{" "}
+          {governanceLink("Open governance")}
+        </Alert>
+      )}
+
+      <section>
+        <div className="row">
+          <strong className="grow">Code checks</strong>
+          {status?.compiled && ds?.invariant && <span className="meta-pill ok">{ds.invariant.components} components in contract</span>}
+          <button className="sm" disabled={!status?.compiled || busy !== null} onClick={() => run("validate", async () => setResult(await api.invoke("invariant:validate", appId)))}>
+            {busy === "validate" ? "Checking…" : "Validate"}
+          </button>
+        </div>
+        {result && (
+          <>
+            <p className="small">
+              {result.summary.files} files · {result.summary.errors} errors · {result.summary.warnings} warnings
+              {pr && ` · pattern rules: ${pr.pass} pass, ${pr.fail} fail, ${pr.warning} warning, ${pr.notVerifiable} not verifiable, ${pr.skipped} skipped`}
+            </p>
+            <ul className="governance-list">
+              {result.violations.map((v, i) => (
+                <li key={i}>
+                  <span className={`meta-pill${v.severity === "error" ? " bad" : ""}`}>{v.severity}</span>{" "}
+                  <code>
+                    {v.file}:{v.line ?? 1}
+                  </code>{" "}
+                  {v.message}
+                  {v.suggestion && <div className="muted small">Fix: {v.suggestion}</div>}
+                </li>
+              ))}
+              {result.violations.length === 0 && <li className="muted">No violations.</li>}
+            </ul>
+          </>
+        )}
+      </section>
+
+      <section>
+        <div className="row">
+          <strong className="grow">Browser checks</strong>
+          <button className="sm" disabled={!status?.compiled || !status?.browserReady || busy !== null} onClick={() => run("browser", async () => setBrowser(await api.invoke("invariant:browser-run", appId)))}>
+            {busy === "browser" ? "Running…" : "Run"}
+          </button>
+        </div>
+        {status && !status.browserReady ? (
+          <p className="muted small">Browser checks aren't installed yet. {governanceLink("Install them from governance")}</p>
+        ) : (
+          <p className="muted small">The app must be running.</p>
+        )}
+        {browser && (
+          <>
+            <p className="small">
+              {browser.browser.name} {browser.browser.version}: {browser.summary.pass} passed, {browser.summary.fail} failed, {browser.summary.error} could not run
+            </p>
+            <ul className="governance-list">
+              {browser.results
+                .filter((r) => r.status !== "pass")
+                .map((r, i) => (
+                  <li key={i}>
+                    <span className="meta-pill bad">{r.status}</span> {r.scenario} · {r.check}
+                    {r.reason && <div className="muted small">{r.reason}</div>}
+                    {r.suggestion && <div className="muted small">Fix: {r.suggestion}</div>}
+                  </li>
+                ))}
+            </ul>
+          </>
+        )}
+      </section>
+    </div>
+  );
+}
