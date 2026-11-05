@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/mcarlucci/Atelier/compare/v0.3.0...v0.4.0) (2026-11-05)
+
+
+### Features
+
+* integrate Invariant UI for design system governance ([93024b7](https://github.com/mcarlucci/Atelier/commit/93024b7e32a22d8f9554136ee97f379dd3fd947f))
+
 ## [0.3.0](https://github.com/mcarlucci/Atelier/compare/v0.2.2...v0.3.0) (2026-10-26)
 
 
