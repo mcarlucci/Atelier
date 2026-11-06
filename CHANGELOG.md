@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/mcarlucci/Atelier/compare/v0.5.0...v0.5.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* bundle invariant-ui in packaged apps ([#9](https://github.com/mcarlucci/Atelier/issues/9)) ([2cee495](https://github.com/mcarlucci/Atelier/commit/2cee4954dfb1ac4bb929c809b17d84a245964c7f))
+
 ## [0.5.0](https://github.com/mcarlucci/Atelier/compare/v0.4.0...v0.5.0) (2026-11-06)
 
 
