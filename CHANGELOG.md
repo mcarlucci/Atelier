@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/mcarlucci/Atelier/compare/v0.6.0...v0.6.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* ship invariant-ui dependencies in packaged apps ([#13](https://github.com/mcarlucci/Atelier/issues/13)) ([1e8c7b9](https://github.com/mcarlucci/Atelier/commit/1e8c7b90db3fb8209a42115441acffedd68f0608))
+
 ## [0.6.0](https://github.com/mcarlucci/Atelier/compare/v0.5.1...v0.6.0) (2026-11-06)
 
 
