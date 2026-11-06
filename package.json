@@ -59,6 +59,7 @@
       "owner": "mcarlucci",
       "repo": "Atelier"
     },
+    "afterPack": "scripts/after-pack.cjs",
     "appId": "dev.atelier.app",
     "productName": "Atelier",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
