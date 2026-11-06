@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/mcarlucci/Atelier/compare/v0.6.2...v0.7.0) (2026-11-06)
+
+
+### Features
+
+* **site:** show the download button for the visitor's platform ([#17](https://github.com/mcarlucci/Atelier/issues/17)) ([05bc61d](https://github.com/mcarlucci/Atelier/commit/05bc61d377755603d2abaa3790c8789ebb877912))
+
 ## [0.6.2](https://github.com/mcarlucci/Atelier/compare/v0.6.1...v0.6.2) (2026-11-06)
 
 
