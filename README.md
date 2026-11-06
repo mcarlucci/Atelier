@@ -122,7 +122,7 @@ Download the installer for your computer from the [latest release](../../release
 
 Atelier isn't code-signed yet, so your computer shows a warning the first time you open it:
 
-- **macOS:** drag Atelier to Applications and open it. When macOS says “Atelier” Not Opened, click **Done**, double-click **Open Security Settings** in the installer window, and click **Open Anyway**. You can also run `xattr -dr com.apple.quarantine /Applications/Atelier.app`. This is needed again after each update.
+- **macOS:** drag Atelier to Applications and open it. Builds are signed and notarized.
 - **Windows:** in the SmartScreen dialog, click **More info → Run anyway**.
 - **Linux:** run `chmod +x Atelier-*.AppImage`, then open the file.
 
