@@ -13,7 +13,8 @@ import { openInvariantToolset } from "../src/main/invariant/mcp";
 import type { NodeRuntime } from "../src/main/node/runtimes";
 import { Services } from "../src/main/services";
 
-const bundledDir = path.join(__dirname, "..", "resources", "invariant");
+// ATELIER_INVARIANT_DIR points the suite at another build, such as one unpacked from an installer.
+const bundledDir = process.env.ATELIER_INVARIANT_DIR ?? path.join(__dirname, "..", "resources", "invariant");
 const fetched = fs.existsSync(path.join(bundledDir, "package.json"));
 const node: NodeRuntime = {
   version: process.versions.node,
@@ -41,6 +42,28 @@ function compileFixture(r: InvariantRunner, appDir: string) {
 }
 
 describe.skipIf(!fetched)("Invariant UI end to end", { timeout: 60_000 }, () => {
+  // Governance -> Contract compiles an installed design system with the config Atelier writes itself.
+  // Releases bundle a pinned Invariant build, so a build that rejects that config breaks the feature.
+  it("compiles an installed design system with the config Atelier writes", async () => {
+    const r = runner();
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "atelier-inv-ds-"));
+    const pkg = path.join(dir, "node_modules", "@fixture", "ds");
+    fs.mkdirSync(path.join(pkg, "dist"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ name: "ds-work", private: true }));
+    fs.writeFileSync(
+      path.join(pkg, "package.json"),
+      JSON.stringify({ name: "@fixture/ds", version: "1.0.0", main: "dist/index.js", module: "dist/index.js", types: "dist/index.d.ts", peerDependencies: { react: "*" } }),
+    );
+    fs.writeFileSync(path.join(pkg, "dist", "index.js"), "export {};\n");
+    fs.writeFileSync(
+      path.join(pkg, "dist", "index.d.ts"),
+      'import * as React from "react";\nexport interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {\n  /** Visual style. */\n  variant?: "primary" | "secondary";\n}\nexport declare const Button: React.ForwardRefExoticComponent<ButtonProps & React.RefAttributes<HTMLButtonElement>>;\nexport default Button;\n',
+    );
+    r.writeConfig(dir, { packageName: "@fixture/ds", framework: "react" }, "ds-work");
+    const counts = await r.compile(dir);
+    expect(counts.components).toBeGreaterThanOrEqual(1);
+  });
+
   it("compiles the design system source into a contract", async () => {
     const appDir = fixtureApp();
     const counts = await compileFixture(runner(), appDir);
