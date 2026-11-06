@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/mcarlucci/Atelier/compare/v0.6.1...v0.6.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* skip node_modules/.bin when bundling invariant-ui ([#15](https://github.com/mcarlucci/Atelier/issues/15)) ([562633c](https://github.com/mcarlucci/Atelier/commit/562633cf16827942ee400504e4dd748fcbf5f510))
+
 ## [0.6.1](https://github.com/mcarlucci/Atelier/compare/v0.6.0...v0.6.1) (2026-11-06)
 
 
