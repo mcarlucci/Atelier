@@ -35,6 +35,7 @@ import { AppRunner, type RunTarget } from "./runner";
 import { NodeRuntimes } from "./node/runtimes";
 import type { FetchFn } from "./node/dist";
 import { ConnectorService } from "./connectors/service";
+import { UpdateService, type UpdaterLike } from "./updater";
 import { InvariantRunner, OUTPUT_DIR } from "./invariant/runner";
 import type { InvariantBrowserReport, InvariantStatus, InvariantValidateResult } from "@shared/invariant";
 import type { ComplianceIssue } from "@shared/types";
@@ -65,6 +66,9 @@ export interface ServiceDeps {
   nodeMirror?: string;
   /** Screenshots a running dev server as a JPEG. Absent in tests. */
   capturePreview?(url: string): Promise<Buffer | null>;
+  /** The auto-updater. Absent in dev builds and tests, which turns updates off. */
+  updater?: UpdaterLike;
+  appVersion?: string;
 }
 
 /** Wait after a change before screenshotting, so HMR and restarts settle and bursts collapse into one capture. */
@@ -77,6 +81,7 @@ export class Services {
   readonly store: Store;
   readonly runner: AppRunner;
   readonly connectors: ConnectorService;
+  readonly updates: UpdateService;
   readonly templates: TemplateService;
   readonly node: NodeRuntimes;
   readonly invariant: InvariantRunner;
@@ -111,6 +116,11 @@ export class Services {
       onChange: (view) => deps.emit("connectors:status", view),
       designSystemExists: (id) => this.store.get().designSystems.some((d) => d.id === id),
       nodeRuntime: () => this.node.resolve([]),
+    });
+    this.updates = new UpdateService({
+      updater: deps.updater,
+      currentVersion: deps.appVersion ?? "dev",
+      emit: (state) => deps.emit("update:state", state),
     });
     this.runner = new AppRunner({
       onOutput: (o) => deps.emit("run:output", o),

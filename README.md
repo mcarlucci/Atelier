@@ -126,7 +126,7 @@ Atelier isn't code-signed yet, so your computer shows a warning the first time y
 - **Windows:** in the SmartScreen dialog, click **More info → Run anyway**.
 - **Linux:** run `chmod +x Atelier-*.AppImage`, then open the file.
 
-**Updates:** to hear about new versions, choose **Watch → Custom → Releases** on this repository. To update, download and install the new version the same way.
+**Updates:** Atelier checks for new versions on launch and every few hours, downloads them in the background, and shows a restart button in the sidebar. Check by hand under Settings → Version. Builds before the updater (0.5.x and older) need one manual download.
 
 ## Project status
 

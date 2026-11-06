@@ -2,8 +2,10 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, net, safeStorage, shell } from "electron";
 import { INVOKE_CHANNELS, type EventChannels, type InvokeChannel, type InvokeChannels } from "@shared/ipc";
+import { autoUpdater } from "electron-updater";
 import { useBundledGit } from "./git";
 import { Services } from "./services";
+import type { UpdaterLike } from "./updater";
 import { selectorScript } from "./preview/selector";
 
 let mainWindow: BrowserWindow | null = null;
@@ -199,6 +201,9 @@ function registerHandlers(services: Services): void {
     "invariant:install-browser": () => services.invariantInstallBrowser(),
     "invariant:compile-ds": (id) => services.recompileDesignSystem(id),
     "invariant:browser-ready": () => services.invariantBrowserReady(),
+    "update:state": () => services.updates.get(),
+    "update:check": () => services.updates.check(),
+    "update:install": () => services.updates.install(),
   };
 
   for (const channel of INVOKE_CHANNELS) {
@@ -234,6 +239,9 @@ app.whenReady().then(() => {
     // Packaging copies resources/invariant the same way.
     bundledInvariantDir: app.isPackaged ? path.join(process.resourcesPath, "invariant") : path.join(app.getAppPath(), "resources/invariant"),
     nodeMirror: process.env.ATELIER_NODE_MIRROR,
+    // Dev runs have no release to update from.
+    updater: app.isPackaged ? (autoUpdater as unknown as UpdaterLike) : undefined,
+    appVersion: app.getVersion(),
     openExternal: (url) => {
       if (/^https?:\/\//.test(url)) void shell.openExternal(url);
     },
@@ -252,6 +260,7 @@ app.whenReady().then(() => {
   });
   registerHandlers(services);
   createWindow();
+  services.updates.start();
 
   app.on("before-quit", () => {
     services.runner.stopAll();
