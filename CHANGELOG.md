@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/mcarlucci/Atelier/compare/v0.4.0...v0.5.0) (2026-11-06)
+
+
+### Features
+
+* sign and notarize macOS builds ([#7](https://github.com/mcarlucci/Atelier/issues/7)) ([8dca2e0](https://github.com/mcarlucci/Atelier/commit/8dca2e0be198d9c3b0d20a17fa8876347736bc68))
+
 ## [0.4.0](https://github.com/mcarlucci/Atelier/compare/v0.3.0...v0.4.0) (2026-11-05)
 
 
