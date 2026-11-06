@@ -70,6 +70,9 @@ jobs:
           npx -y pnpm@12.16.1 run build:npm
       - name: Bundle Invariant UI
         run: npm run fetch-invariant -- --from "$RUNNER_TEMP/invariant/dist-npm"
+      # Stops a release whose bundled Invariant can't compile a design system (Governance -> Contract).
+      - name: Check bundled Invariant UI
+        run: npx vitest run tests/invariant.e2e.test.ts
       - name: Bundle Node.js and git
         run: |
           for t in ${{ matrix.targets }}; do
