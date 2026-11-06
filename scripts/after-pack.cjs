@@ -10,5 +10,9 @@ exports.default = async function afterPack({ appOutDir, packager, electronPlatfo
       : path.join(appOutDir, "resources");
   const from = path.join(__dirname, "..", "resources", "invariant", "node_modules");
   if (!fs.existsSync(from)) throw new Error(`${from} is missing; run npm run fetch-invariant first.`);
-  fs.cpSync(from, path.join(resources, "invariant", "node_modules"), { recursive: true, dereference: true });
+  // Skip .bin: cpSync copies its links as absolute paths into this checkout, which codesign rejects.
+  fs.cpSync(from, path.join(resources, "invariant", "node_modules"), {
+    recursive: true,
+    filter: (src) => path.basename(src) !== ".bin",
+  });
 };
