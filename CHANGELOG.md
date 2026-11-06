@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/mcarlucci/Atelier/compare/v0.5.1...v0.6.0) (2026-11-06)
+
+
+### Features
+
+* implement auto-updater functionality ([#11](https://github.com/mcarlucci/Atelier/issues/11)) ([49dd218](https://github.com/mcarlucci/Atelier/commit/49dd2189d37c1d60d6a56b729b438d62dafe3577))
+
 ## [0.5.1](https://github.com/mcarlucci/Atelier/compare/v0.5.0...v0.5.1) (2026-11-06)
 
 
