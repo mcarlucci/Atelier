@@ -3,6 +3,7 @@ import type { AppRecord, Settings } from "@shared/types";
 import { api } from "./api";
 import appIconUrl from "../../../assets/atelier/svg/atelier-app-icon.svg";
 import AppAvatar from "./components/AppAvatar";
+import UpdateBanner from "./components/UpdateBanner";
 import { applyTheme, relativeTime, useThemePreference } from "./format";
 import AppsPage from "./pages/AppsPage";
 import SettingsShell, { SETTINGS_PAGES, type SettingsRoute } from "./pages/SettingsShell";
@@ -50,6 +51,7 @@ export default function App() {
         <img className="logo" src={appIconUrl} alt="" aria-hidden="true" />
         {railItem("Apps", "home", { page: "apps" }, route.page === "apps" || route.page === "workspace")}
         <div className="rail-foot">
+          <UpdateBanner />
           {settings && !settings.ready && (
             <Tooltip label="Set up an AI model" placement="right">
               <button className="rail-item warn" aria-label="Set up an AI model" onClick={() => setRoute({ page: "settings" })}>

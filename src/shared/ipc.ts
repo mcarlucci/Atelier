@@ -14,6 +14,7 @@ import type {
   RunnerStatus,
   SelectedElement,
   Settings,
+  UpdateState,
   VersionInfo,
 } from "./types";
 import type { ProviderId } from "./providers";
@@ -133,6 +134,12 @@ export interface InvokeChannels {
   "invariant:install-browser": { args: []; result: InvariantStatus["browserReady"] };
   /** Runs Invariant's browser checks against the app's running dev server. */
   "invariant:browser-run": { args: [string]; result: InvariantBrowserReport };
+  /** Current update state (also pushed as the "update:state" event). */
+  "update:state": { args: []; result: UpdateState };
+  /** Checks for a new version now. */
+  "update:check": { args: []; result: UpdateState };
+  /** Quits and installs a downloaded update. */
+  "update:install": { args: []; result: void };
 }
 
 /** Main to renderer push events. */
@@ -148,6 +155,7 @@ export interface EventChannels {
   "ds:import-progress": { line: string };
   /** Invariant UI finished something in the background (such as installing browser checks). */
   "invariant:updated": { designSystemId?: string };
+  "update:state": UpdateState;
 }
 
 export type InvokeChannel = keyof InvokeChannels;
@@ -211,6 +219,9 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   "invariant:install-browser",
   "invariant:compile-ds",
   "invariant:browser-ready",
+  "update:state",
+  "update:check",
+  "update:install",
 ];
 
 export const EVENT_CHANNELS: readonly EventChannel[] = [
@@ -222,6 +233,7 @@ export const EVENT_CHANNELS: readonly EventChannel[] = [
   "app:preview-image",
   "ds:import-progress",
   "invariant:updated",
+  "update:state",
 ];
 
 export interface AtelierApi {

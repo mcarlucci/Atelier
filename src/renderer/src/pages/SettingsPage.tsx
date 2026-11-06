@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Settings } from "@shared/types";
+import type { Settings, UpdateState } from "@shared/types";
 import { api, errorMessage } from "../api";
 import ProviderSettings from "../components/ProviderSettings";
 import { applyTheme, useThemePreference, type ThemePreference } from "../format";
@@ -11,6 +11,12 @@ export default function SettingsPage({ onChange }: { onChange(s: Settings): void
   const [settings, setSettings] = useState<Settings | null>(null);
   const [folder, setFolder] = useState("");
   const theme = useThemePreference();
+  const [update, setUpdate] = useState<UpdateState | null>(null);
+
+  useEffect(() => {
+    void api.invoke("update:state").then(setUpdate);
+    return api.on("update:state", setUpdate);
+  }, []);
 
   useEffect(() => {
     void api.invoke("settings:get").then((s) => {
@@ -29,6 +35,19 @@ export default function SettingsPage({ onChange }: { onChange(s: Settings): void
   if (!settings) return null;
   return (
     <div className="page-scroll narrow">
+      <section className="card form">
+        <h2>Version</h2>
+        <p className="muted small">
+          Atelier {update?.currentVersion}. {updateText(update)}
+        </p>
+        <button
+          disabled={update?.status === "checking" || update?.status === "downloading"}
+          onClick={() => api.invoke("update:check").then(setUpdate, fail)}
+        >
+          Check for updates
+        </button>
+      </section>
+
       <section className="card form">
         <h2>Appearance</h2>
         <ToggleGroup
@@ -66,4 +85,19 @@ export default function SettingsPage({ onChange }: { onChange(s: Settings): void
       </section>
     </div>
   );
+}
+
+function updateText(u: UpdateState | null): string {
+  switch (u?.status) {
+    case "checking":
+      return "Checking for updates…";
+    case "downloading":
+      return `Downloading ${u.version}${u.percent ? ` (${u.percent}%)` : ""}…`;
+    case "ready":
+      return `${u.version} is ready. Restart from the sidebar to install it.`;
+    case "error":
+      return `Could not check for updates: ${u.error ?? "unknown error"}`;
+    default:
+      return "You're up to date.";
+  }
 }

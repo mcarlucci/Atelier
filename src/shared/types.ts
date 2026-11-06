@@ -276,3 +276,12 @@ export interface RunnerOutput {
   stream: "stdout" | "stderr" | "system";
   text: string;
 }
+
+/** Where the in-app updater stands. `version` is the new version once one is found. */
+export interface UpdateState {
+  status: "idle" | "checking" | "downloading" | "ready" | "error";
+  currentVersion: string;
+  version?: string;
+  percent?: number;
+  error?: string;
+}
