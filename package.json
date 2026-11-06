@@ -41,6 +41,10 @@
   "build": {
     "extraResources": [
       {
+        "from": "resources/invariant",
+        "to": "invariant"
+      },
+      {
         "from": "THIRD_PARTY_NOTICES.md",
         "to": "THIRD_PARTY_NOTICES.md"
       },
