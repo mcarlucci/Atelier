@@ -4,7 +4,7 @@ import { importStage } from "@shared/importStages";
 import { api, errorMessage } from "../api";
 import type { Route } from "../App";
 import { defaultTemplateFor, FRAMEWORK_LABELS, FRAMEWORK_PACKAGE, isCompatible, type TemplateInfo } from "@shared/templates";
-import DesignSystemGovernance from "../components/DesignSystemGovernance";
+import DesignSystemCompliance from "../components/DesignSystemCompliance";
 import { Icon } from "../ui/icons";
 import { Alert, Checkbox, Progress, Select, TabPanel, Tabs, TextArea, TextField, ToggleGroup, toast, useConfirm } from "../ui/slab";
 
@@ -368,7 +368,7 @@ function DesignSystemDetail({
           { id: "components", label: "Components" },
           { id: "setup", label: "Setup" },
           { id: "templates", label: "Templates" },
-          { id: "governance", label: "Governance" },
+          { id: "compliance", label: "Compliance" },
         ]}
       >
         <TabPanel name="components" className="panel-stack">
@@ -497,8 +497,8 @@ function DesignSystemDetail({
           <TemplatesTab ds={ds} onChange={onChange} />
         </TabPanel>
 
-        <TabPanel name="governance">
-          <DesignSystemGovernance ds={ds} onChange={onChange} />
+        <TabPanel name="compliance">
+          <DesignSystemCompliance ds={ds} onChange={onChange} />
         </TabPanel>
       </Tabs>
     </div>

@@ -7,10 +7,10 @@ import { Alert, Disclosure, TextArea, toast } from "../ui/slab";
 type Busy = "compile" | "save" | "install" | null;
 
 /**
- * Everything that governs what the AI builds with a design system: the Invariant UI contract compiled when it
+ * Everything that keeps what the AI builds on-system with a design system: the Invariant UI contract compiled when it
  * was imported, the team's own guidelines, and the exact rules the model receives.
  */
-export default function DesignSystemGovernance({ ds, onChange }: { ds: DesignSystem; onChange(ds: DesignSystem): void }) {
+export default function DesignSystemCompliance({ ds, onChange }: { ds: DesignSystem; onChange(ds: DesignSystem): void }) {
   const [guidelines, setGuidelines] = useState(ds.guidelines);
   const [rules, setRules] = useState("");
   const [browserReady, setBrowserReady] = useState<boolean>();
@@ -41,7 +41,7 @@ export default function DesignSystemGovernance({ ds, onChange }: { ds: DesignSys
 
   const contract = ds.invariant;
   return (
-    <div className="governance-stack">
+    <div className="compliance-stack">
       {error && (
         <Alert tone="danger" onDismiss={() => setError(undefined)}>
           {error}

@@ -8,18 +8,18 @@ type Busy = "validate" | "browser" | null;
 
 /**
  * Invariant UI checks for one app: code checks against the design system's contract, and browser checks against
- * the running preview. The contract itself lives on the design system's Governance tab.
+ * the running preview. The contract itself lives on the design system's Compliance tab.
  */
 export default function ChecksPanel({
   appId,
   ds,
   refreshKey,
-  onOpenGovernance,
+  onOpenCompliance,
 }: {
   appId: string;
   ds?: DesignSystem;
   refreshKey: number;
-  onOpenGovernance(): void;
+  onOpenCompliance(): void;
 }) {
   const [status, setStatus] = useState<InvariantStatus>();
   const [result, setResult] = useState<InvariantValidateResult>();
@@ -53,14 +53,14 @@ export default function ChecksPanel({
     }
   };
 
-  const governanceLink = (label: string) => (
-    <button className="link" onClick={onOpenGovernance}>
+  const complianceLink = (label: string) => (
+    <button className="link" onClick={onOpenCompliance}>
       {label}
     </button>
   );
   const pr = result?.summary.patternRules;
   return (
-    <div className="page-scroll governance">
+    <div className="page-scroll compliance">
       <div>
         <h2>Checks</h2>
         <p className="muted small">
@@ -69,15 +69,15 @@ export default function ChecksPanel({
             Invariant UI
           </a>
           {status?.version ? ` ${status.version}` : ""}. Results that can't be verified are never counted as passes.{" "}
-          {governanceLink("Open governance")}
+          {complianceLink("Open compliance")}
         </p>
       </div>
       {error && <Alert tone="danger">{error}</Alert>}
       {status && !status.installed && <Alert tone="warning">Invariant UI isn't bundled with this build.</Alert>}
       {status && status.installed && !status.compiled && (
         <Alert tone="warning">
-          This app has no contract to check against yet. {status.message ?? "Compile the design system's contract from its Governance tab."}{" "}
-          {governanceLink("Open governance")}
+          This app has no contract to check against yet. {status.message ?? "Compile the design system's contract from its Compliance tab."}{" "}
+          {complianceLink("Open compliance")}
         </Alert>
       )}
 
@@ -95,7 +95,7 @@ export default function ChecksPanel({
               {result.summary.files} files · {result.summary.errors} errors · {result.summary.warnings} warnings
               {pr && ` · pattern rules: ${pr.pass} pass, ${pr.fail} fail, ${pr.warning} warning, ${pr.notVerifiable} not verifiable, ${pr.skipped} skipped`}
             </p>
-            <ul className="governance-list">
+            <ul className="compliance-list">
               {result.violations.map((v, i) => (
                 <li key={i}>
                   <span className={`meta-pill${v.severity === "error" ? " bad" : ""}`}>{v.severity}</span>{" "}
@@ -120,7 +120,7 @@ export default function ChecksPanel({
           </button>
         </div>
         {status && !status.browserReady ? (
-          <p className="muted small">Browser checks aren't installed yet. {governanceLink("Install them from governance")}</p>
+          <p className="muted small">Browser checks aren't installed yet. {complianceLink("Install them from compliance")}</p>
         ) : (
           <p className="muted small">The app must be running.</p>
         )}
@@ -129,7 +129,7 @@ export default function ChecksPanel({
             <p className="small">
               {browser.browser.name} {browser.browser.version}: {browser.summary.pass} passed, {browser.summary.fail} failed, {browser.summary.error} could not run
             </p>
-            <ul className="governance-list">
+            <ul className="compliance-list">
               {browser.results
                 .filter((r) => r.status !== "pass")
                 .map((r, i) => (

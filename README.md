@@ -95,9 +95,9 @@ Supported providers: Anthropic (Claude), Ollama, LM Studio, OpenRouter, Groq, Go
 
 Connectors let the AI look things up while it builds: a design in Figma, a component's documentation in Storybook, or any tool that speaks the Model Context Protocol (MCP). With the Figma connector set up, paste a Figma link into the chat and Atelier builds that design from your components. See [Connectors](docs/connectors.md).
 
-## Govern what the AI builds
+## Keep the AI on-system
 
-Atelier bundles [Invariant UI](https://invariantui.com), which turns a design system into a contract of components, tokens and approved UX patterns. The AI reads the contract while it builds, each turn's code is checked against it, and the workspace's Governance tab shows the results. See [Governance](docs/governance.md).
+Atelier bundles [Invariant UI](https://invariantui.com), which turns a design system into a contract of components, tokens and approved UX patterns. The AI reads the contract while it builds, each turn's code is checked against it, and the workspace's Compliance tab shows the results. See [Compliance](docs/compliance.md).
 
 ## Built for company use
 
@@ -130,7 +130,7 @@ Atelier isn't code-signed yet, so your computer shows a warning the first time y
 
 ## Project status
 
-Atelier is in early development (0.x). React works end to end. Vue and Angular support importing, building, previewing and Invariant UI governance checks. Expect rough edges, and please [open an issue](../../issues) when you find one.
+Atelier is in early development (0.x). React works end to end. Vue and Angular support importing, building, previewing and Invariant UI compliance checks. Expect rough edges, and please [open an issue](../../issues) when you find one.
 
 ## Documentation
 
@@ -139,7 +139,7 @@ Atelier is in early development (0.x). React works end to end. Vue and Angular s
 - [Templates and Node.js](docs/templates.md)
 - [AI models](docs/models.md)
 - [Connectors](docs/connectors.md)
-- [Governance with Invariant UI](docs/governance.md)
+- [Compliance with Invariant UI](docs/compliance.md)
 - [Security](docs/security.md)
 - [Contributing](CONTRIBUTING.md): run from source, run the tests, and make releases.
 

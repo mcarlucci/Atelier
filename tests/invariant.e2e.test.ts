@@ -42,7 +42,7 @@ function compileFixture(r: InvariantRunner, appDir: string) {
 }
 
 describe.skipIf(!fetched)("Invariant UI end to end", { timeout: 60_000 }, () => {
-  // Governance -> Contract compiles an installed design system with the config Atelier writes itself.
+  // Compliance -> Contract compiles an installed design system with the config Atelier writes itself.
   // Releases bundle a pinned Invariant build, so a build that rejects that config breaks the feature.
   it("compiles an installed design system with the config Atelier writes", async () => {
     const r = runner();
@@ -168,7 +168,7 @@ describe.skipIf(!fetched)("Invariant UI end to end", { timeout: 60_000 }, () => 
     installDesignSystem(dsDir);
     expect(services.store.get().designSystems[0]?.invariant).toBeUndefined();
 
-    await (services as unknown as { setupGovernance(id: string): Promise<void> }).setupGovernance("ds");
+    await (services as unknown as { setupCompliance(id: string): Promise<void> }).setupCompliance("ds");
     expect(services.store.get().designSystems[0]?.invariant).toMatchObject({ components: 5 });
 
     // The app was never compiled by the user, yet has the design system's contract.
@@ -203,7 +203,7 @@ describe.skipIf(!fetched)("Invariant UI end to end", { timeout: 60_000 }, () => 
   it("records why when the design system can't be compiled, and doesn't fail", async () => {
     const appDir = fixtureApp();
     const services = servicesFor(appDir);
-    await (services as unknown as { setupGovernance(id: string): Promise<void> }).setupGovernance("ds");
+    await (services as unknown as { setupCompliance(id: string): Promise<void> }).setupCompliance("ds");
     const info = services.store.get().designSystems[0]?.invariant;
     expect(info?.components).toBe(0);
     expect(services.invariantStatus("app").compiled).toBe(false);

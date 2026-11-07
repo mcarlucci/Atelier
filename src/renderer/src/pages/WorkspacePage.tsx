@@ -250,7 +250,7 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
               appId={appId}
               ds={ds}
               refreshKey={versionsKey}
-              onOpenGovernance={() => app && navigate({ page: "design-systems", selectedId: app.designSystemId, tab: "governance" })}
+              onOpenCompliance={() => app && navigate({ page: "design-systems", selectedId: app.designSystemId, tab: "compliance" })}
             />
           </TabPanel>
           <TabPanel name="versions" className="tab-body">

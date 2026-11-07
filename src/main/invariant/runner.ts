@@ -198,7 +198,7 @@ export class InvariantRunner {
 
   async browserRun(appDir: string, url: string): Promise<InvariantBrowserReport> {
     if (!this.playwrightReady() && !fs.existsSync(path.join(appDir, "node_modules", "playwright"))) {
-      throw new Error("Browser checks need Playwright. Install it from the Governance tab.");
+      throw new Error("Browser checks need Playwright. Install it from the Compliance tab.");
     }
     if (this.playwrightReady()) this.linkPlaywright(appDir);
     const res = await this.cli(appDir, ["browser", "run", "--spec", this.browserSpecFor(appDir, url), "--url", url, "--json"]);
