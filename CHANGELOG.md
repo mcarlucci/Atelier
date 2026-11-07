@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/mcarlucci/Atelier/compare/v0.8.0...v0.8.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* rename Governance to Compliance throughout the app, docs and site ([#28](https://github.com/mcarlucci/Atelier/issues/28)) ([fd2309b](https://github.com/mcarlucci/Atelier/commit/fd2309bf87845abb4f49408a1d1823b86cde5509))
+
 ## [0.8.0](https://github.com/mcarlucci/Atelier/compare/v0.7.1...v0.8.0) (2026-11-07)
 
 
