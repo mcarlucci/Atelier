@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/mcarlucci/Atelier/compare/v0.7.1...v0.8.0) (2026-11-07)
+
+
+### Features
+
+* describe first-run setup and Vue/Angular governance in the README ([#25](https://github.com/mcarlucci/Atelier/issues/25)) ([fccdadf](https://github.com/mcarlucci/Atelier/commit/fccdadf9a93c5d2b24a9c9404cbf4f77c274a4c0))
+
 ## [0.7.1](https://github.com/mcarlucci/Atelier/compare/v0.7.0...v0.7.1) (2026-11-06)
 
 
