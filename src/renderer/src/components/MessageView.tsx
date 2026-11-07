@@ -119,6 +119,49 @@ function ActionCard({ seg }: { seg: Extract<Segment, { kind: "action" }> }) {
   );
 }
 
+const GOVERNANCE_PREFIX = "Invariant UI · ";
+const isGovernance = (s: Segment): s is ToolSeg => s.kind === "tool" && s.label.startsWith(GOVERNANCE_PREFIX);
+type ToolSeg = Extract<Segment, { kind: "tool" }>;
+
+/** The design system contract tools the model called, shown together so governance is visible. */
+function GovernanceCard({ calls }: { calls: ToolSeg[] }) {
+  const failed = calls.filter((c) => c.error).length;
+  return (
+    <div className="action-card">
+      <div className="action-head">
+        <span className="action-icon">
+          <Icon name="shield" size={14} />
+        </span>
+        <span className="action-verb">Governance</span>
+        <span className="action-target truncate">
+          <strong>
+            {calls.length} contract {calls.length === 1 ? "check" : "checks"}
+          </strong>
+          <span className="muted"> Invariant UI</span>
+        </span>
+      </div>
+      <div className="action-detail muted small">
+        Your design system's contract guided this build{failed ? `, and ${failed} ${failed === 1 ? "lookup" : "lookups"} failed` : ""}.
+      </div>
+      <Disclosure label={`Show ${calls.length} ${calls.length === 1 ? "check" : "checks"}`} className="action-code">
+        <ul className="gov-list">
+          {calls.map((c, i) => (
+            <li key={i} className={c.error ? "error" : ""}>
+              <Icon name={c.error ? "alert" : "plug"} size={12} />
+              <b>{c.label.slice(GOVERNANCE_PREFIX.length)}</b>
+              {c.detail && (
+                <span className="muted truncate" title={c.detail}>
+                  {c.detail}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Disclosure>
+    </div>
+  );
+}
+
 function ToolCard({ seg }: { seg: Extract<Segment, { kind: "tool" }> }) {
   return (
     <div className={`tool-card${seg.error ? " error" : ""}`}>
@@ -168,9 +211,16 @@ export default function MessageView({
   const last = segs.at(-1);
   return (
     <div className="msg assistant">
-      {segs.map((s, i) =>
-        s.kind === "text" ? <Markdown key={i} text={s.text.trim()} /> : s.kind === "tool" ? <ToolCard key={i} seg={s} /> : <ActionCard key={i} seg={s} />,
-      )}
+      {segs.map((s, i) => {
+        if (s.kind === "text") return <Markdown key={i} text={s.text.trim()} />;
+        if (s.kind === "action") return <ActionCard key={i} seg={s} />;
+        if (!isGovernance(s)) return <ToolCard key={i} seg={s} />;
+        // One card per run of consecutive contract calls, rendered at the run's first call.
+        if (i > 0 && isGovernance(segs[i - 1])) return null;
+        const calls: ToolSeg[] = [];
+        for (let j = i; j < segs.length && isGovernance(segs[j]); j++) calls.push(segs[j] as ToolSeg);
+        return <GovernanceCard key={i} calls={calls} />;
+      })}
       {streaming && (segs.length === 0 || last?.kind === "tool" || (last?.kind === "action" && !last.pending)) && (
         <ThinkingDots label={segs.length ? "Working" : "Thinking"} />
       )}
