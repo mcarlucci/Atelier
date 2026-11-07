@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import type { AppRecord, DesignSystem } from "@shared/types";
+import type { AppRecord, DesignSystem, Settings } from "@shared/types";
 import { BUILTIN_TEMPLATE_IDS, defaultTemplateFor, FRAMEWORK_LABELS, isCompatible, templateVersionProblem, type TemplateInfo } from "@shared/templates";
 import { api, errorMessage } from "../api";
 import type { Route } from "../App";
 import AppAvatar from "../components/AppAvatar";
 import AppNameInput from "../components/AppNameInput";
+import SetupWizard from "../components/SetupWizard";
 import ModelMenu from "../components/ModelMenu";
 import PromptBox from "../components/PromptBox";
 import { nameFromPrompt, relativeTime } from "../format";
@@ -25,6 +26,8 @@ const IDEAS_SHOWN = 4;
 const APPS_PER_PAGE = 6;
 
 export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppRecord[]; onAppsChanged(): void; navigate(r: Route): void }) {
+  const [skipped, setSkipped] = useState(false);
+  const [settings, setSettings] = useState<Settings | null>(null);
   const [systems, setSystems] = useState<DesignSystem[] | null>(null);
   const [dsId, setDsId] = useState("");
   const [templates, setTemplates] = useState<TemplateInfo[]>([]);
@@ -44,6 +47,7 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
   const savedChoice = useRef<string | null>(null);
   useEffect(() => {
     void Promise.all([api.invoke("ds:list"), api.invoke("templates:list"), api.invoke("settings:get")]).then(([list, tpls, settings]) => {
+      setSettings(settings);
       setTemplates(tpls);
       setSystems(list);
       // The last design system and template used, while they still exist and fit each other.
@@ -140,6 +144,7 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
   const shown = matching.slice((currentPage - 1) * APPS_PER_PAGE, currentPage * APPS_PER_PAGE);
 
   if (systems === null) return <div className="page-scroll" />;
+  const needsSetup = !skipped && (systems.length === 0 || (settings !== null && !settings.ready));
 
   return (
     <div className="page-scroll home">
@@ -149,20 +154,36 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
           <Icon name="sparkles" size={13} />
           {ds ? `Built only from ${ds.name}${template ? ` in ${template.name}` : ""}` : "Bring your own design system"}
         </div>
-        <h1 className="hero-title">Workshop your idea</h1>
-        {systems.length === 0 ? (
+        <h1 className="hero-title">{needsSetup ? "Get started" : "Workshop your idea"}</h1>
+        {needsSetup ? (
+          settings && (
+            <SetupWizard
+              systems={systems}
+              settings={settings}
+              onSettings={setSettings}
+              onSkip={() => setSkipped(true)}
+              onImported={() => {
+                void api.invoke("ds:list").then((list) => {
+                  setSystems(list);
+                  if (list[0]) {
+                    setDsId(list[0].id);
+                    setTemplateId(defaultTemplateFor(list[0], templates)?.id ?? "");
+                  }
+                });
+              }}
+            />
+          )
+        ) : systems.length === 0 ? (
           <div className="hero-empty card">
             <span className="hero-empty-icon">
               <Icon name="palette" size={22} />
             </span>
             <div className="grow">
               <h2>Import your design system first</h2>
-              <p className="muted">
-                Atelier builds prototypes only from your organization's components. Import a React, Vue or Angular package to get started.
-              </p>
+              <p className="muted">Atelier builds prototypes only from your organization's components.</p>
             </div>
-            <button className="primary" onClick={() => navigate({ page: "design-systems" })}>
-              Import a design system
+            <button className="primary" onClick={() => setSkipped(false)}>
+              Back to setup
             </button>
           </div>
         ) : (

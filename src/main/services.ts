@@ -525,7 +525,9 @@ export class Services {
       if (ds.framework !== "react" && ds.framework !== "vue" && ds.framework !== "angular") throw new Error(`Invariant UI does not support ${ds.framework}.`);
       const dir = this.dsWorkDir(id);
       this.invariant.writeConfig(dir, { packageName: ds.packageName, framework: ds.framework }, ds.name);
+      this.deps.emit("ds:import-progress", { line: "[compile] Compiling the Invariant contract…" });
       const counts = await this.invariant.compile(dir);
+      this.deps.emit("ds:import-progress", { line: `[compile] Contract built from ${counts.components} components.` });
       info = { components: counts.components, compiledAt: Date.now() };
     } catch (err) {
       info = { components: 0, compiledAt: Date.now(), error: err instanceof Error ? err.message.split("\n")[0] : String(err) };

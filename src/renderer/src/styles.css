@@ -2303,3 +2303,162 @@ slab-disclosure.files-disclosure::part(summary) {
   flex-direction: column;
   gap: 12px;
 }
+
+/* ---------------------------------------------------------------- setup wizard */
+
+.wizard {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+}
+
+.wizard h2,
+.wizard p {
+  margin: 0;
+}
+
+.wiz-steps {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.wiz-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.wiz-steps li:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  block-size: 1px;
+  background: var(--border);
+}
+
+.wiz-steps li.current {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.wiz-dot {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.wiz-steps li.current .wiz-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.wiz-steps li.done .wiz-dot {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
+  border-color: transparent;
+  color: var(--accent);
+}
+
+.wiz-import {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.pick {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  box-shadow: none;
+  text-align: start;
+}
+
+.pick:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+}
+
+.wiz-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.wiz-or::before,
+.wiz-or::after {
+  content: "";
+  flex: 1;
+  block-size: 1px;
+  background: var(--border);
+}
+
+.wiz-skip {
+  align-self: center;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.wiz-skip:hover {
+  color: var(--text);
+}
+
+/* Contract tool calls, listed inside a Governance action card. */
+.gov-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+}
+
+.gov-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gov-list li .icon {
+  color: var(--accent);
+}
+
+.gov-list li.error .icon {
+  color: var(--danger);
+}
+
+.gov-list b {
+  flex: none;
+  font-weight: 500;
+}
