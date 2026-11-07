@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { AppRecord, ChatRecord, DesignSystem, EffortLevel, MessageRecord } from "@shared/types";
+import type { AppRecord, ChatRecord, DesignSystem, EffortLevel, MessageRecord, Progress } from "@shared/types";
 import type { ProviderId } from "@shared/providers";
 import type { ConnectorConfig } from "@shared/connectors";
 import type { TemplateInfo } from "@shared/templates";
@@ -15,6 +15,7 @@ export interface PersistedSettings {
   /** Last design system and template picked on the home page. */
   lastDesignSystemId?: string;
   lastTemplateId?: string;
+  progress?: Progress;
   /** Anthropic API key encrypted with Electron safeStorage, base64. */
   encryptedApiKey?: string;
   /** Other providers. Keys are encrypted like the Anthropic one. */

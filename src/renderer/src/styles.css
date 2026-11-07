@@ -2510,3 +2510,16 @@ slab-disclosure.files-disclosure::part(summary) {
 .create-progress p {
   margin: 0;
 }
+
+button.meta-pill {
+  cursor: pointer;
+  box-shadow: none;
+}
+
+button.meta-pill:hover {
+  color: var(--text);
+}
+
+.follow-ups {
+  align-items: center;
+}

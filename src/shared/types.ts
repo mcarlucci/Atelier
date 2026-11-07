@@ -237,6 +237,13 @@ export interface ProviderSettings {
   shownModels?: string[];
 }
 
+/** First time (ms since epoch) the user reached each milestone shown on the home page. */
+export interface Progress {
+  firstBuild?: number;
+  compliancePass?: number;
+  restored?: number;
+}
+
 export interface Settings {
   /** Active provider and its model. */
   provider: ProviderId;
@@ -250,6 +257,7 @@ export interface Settings {
   /** Last design system and template picked on the home page. */
   lastDesignSystemId?: string;
   lastTemplateId?: string;
+  progress?: Progress;
 }
 
 export interface ProviderUpdate {

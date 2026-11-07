@@ -5,6 +5,7 @@ import type {
   DesignSystemManifestOverride,
   DesignSystemSource,
   EffortLevel,
+  Progress,
   FrameworkId,
   MessageRecord,
   PreviewEdit,
@@ -33,7 +34,7 @@ export const PREVIEW_SELECT_MESSAGE = "atelier:select";
 export interface InvokeChannels {
   "settings:get": { args: []; result: Settings };
   "settings:set": {
-    args: [Partial<{ model: string; effort: EffortLevel; appsFolder: string; lastDesignSystemId: string; lastTemplateId: string }>];
+    args: [Partial<{ model: string; effort: EffortLevel; appsFolder: string; lastDesignSystemId: string; lastTemplateId: string; progress: Progress }>];
     result: Settings;
   };
   "settings:configure-provider": { args: [ProviderId, ProviderUpdate]; result: Settings };

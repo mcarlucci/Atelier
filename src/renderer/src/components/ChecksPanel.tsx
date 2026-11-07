@@ -15,14 +15,20 @@ export default function ChecksPanel({
   ds,
   refreshKey,
   onOpenCompliance,
+  autoResult,
+  onFix,
 }: {
   appId: string;
   ds?: DesignSystem;
   refreshKey: number;
   onOpenCompliance(): void;
+  /** The code check that ran by itself after the last build. */
+  autoResult?: InvariantValidateResult;
+  /** Sends the violations to the AI to fix. */
+  onFix?(prompt: string): void;
 }) {
   const [status, setStatus] = useState<InvariantStatus>();
-  const [result, setResult] = useState<InvariantValidateResult>();
+  const [manual, setResult] = useState<InvariantValidateResult>();
   const [browser, setBrowser] = useState<InvariantBrowserReport>();
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string>();
@@ -58,6 +64,7 @@ export default function ChecksPanel({
       {label}
     </button>
   );
+  const result = manual ?? autoResult;
   const pr = result?.summary.patternRules;
   return (
     <div className="page-scroll compliance">
@@ -108,6 +115,16 @@ export default function ChecksPanel({
               ))}
               {result.violations.length === 0 && <li className="muted">No violations.</li>}
             </ul>
+            {onFix && result.violations.length > 0 && (
+              <button
+                className="sm primary"
+                onClick={() =>
+                  onFix(`Fix these compliance violations:\n${result.violations.map((v) => `- ${v.file}:${v.line ?? 1} ${v.message}${v.suggestion ? ` (${v.suggestion})` : ""}`).join("\n")}`)
+                }
+              >
+                Fix with AI
+              </button>
+            )}
           </>
         )}
       </section>
