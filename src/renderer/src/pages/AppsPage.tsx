@@ -9,6 +9,7 @@ import SetupWizard from "../components/SetupWizard";
 import ModelMenu from "../components/ModelMenu";
 import PromptBox from "../components/PromptBox";
 import { rankIdeas } from "@shared/ideas";
+import { milestones } from "@shared/milestones";
 import { nameFromPrompt, relativeTime } from "../format";
 import { Icon, type IconName } from "../ui/icons";
 import { Alert, Menu, MenuItem, Pagination, Progress, Select, TextField, toast, useConfirm } from "../ui/slab";
@@ -140,6 +141,7 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
   const ideas = Array.from({ length: IDEAS_SHOWN }, (_, i) => ranked[(ideaOffset + i) % ranked.length]);
   // Before the first app, an idea builds straight away: no typing needed to see the result.
   const firstRun = apps.length === 0;
+  const steps = milestones({ designSystems: systems?.length ?? 0, apps: apps.length, progress: settings?.progress });
   const recent = [...apps].sort((a, b) => b.updatedAt - a.updatedAt);
   const templateName = (app: AppRecord) =>
     templates.find((t) => t.id === (app.templateId ?? BUILTIN_TEMPLATE_IDS[app.framework]))?.name ?? "Template removed";
@@ -202,6 +204,16 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
           </div>
         ) : (
           <>
+            {recent[0] && (
+              <button className="continue-app" onClick={() => navigate({ page: "workspace", appId: recent[0].id })}>
+                <AppAvatar app={recent[0]} size={28} />
+                <span className="grow">
+                  <b>Continue: {recent[0].name}</b>
+                  <span className="muted small"> · edited {relativeTime(recent[0].updatedAt)}</span>
+                </span>
+                <Icon name="arrowUp" size={14} className="continue-arrow" />
+              </button>
+            )}
             <PromptBox
               value={prompt}
               onValue={setPrompt}
@@ -284,6 +296,25 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
                 More ideas
               </button>
             </div>
+            {steps.some((m) => !m.done) && (
+              <div className="milestones card">
+                <div className="row">
+                  <strong className="grow">Getting started</strong>
+                  <span className="muted small">
+                    {steps.filter((m) => m.done).length} of {steps.length}
+                  </span>
+                </div>
+                <progress max={steps.length} value={steps.filter((m) => m.done).length} aria-label="Getting started progress" />
+                <ul>
+                  {steps.map((m) => (
+                    <li key={m.id} className={m.done ? "done" : ""}>
+                      <Icon name={m.done ? "check" : "plus"} size={13} />
+                      {m.label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </>
         )}
       </section>

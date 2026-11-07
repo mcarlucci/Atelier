@@ -49,7 +49,15 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
   const [ds, setDs] = useState<DesignSystem | null>(null);
   const [chats, setChats] = useState<ChatRecord[]>([]);
   const [chatId, setChatId] = useState<string | null>(null);
-  const [tab, setTab] = useState<string>("preview");
+  // The tab each app was last left on, so reopening picks up where the user was.
+  const [tab, setTabState] = useState<string>(() => localStorage.getItem(`atelier.tab.${appId}`) ?? "preview");
+  const setTab = useCallback(
+    (id: string) => {
+      setTabState(id);
+      localStorage.setItem(`atelier.tab.${appId}`, id);
+    },
+    [appId],
+  );
   const [status, setStatus] = useState<RunnerStatus>({ state: "stopped" });
   const [consoleText, setConsoleText] = useState("");
   const [errorCount, setErrorCount] = useState(0);
@@ -121,7 +129,7 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
   }, [appId]);
 
   // A finished build lands on the preview, where the result is.
-  const onBuilt = useCallback(() => setTab("preview"), []);
+  const onBuilt = useCallback(() => setTab("preview"), [setTab]);
   const onVersionsChanged = useCallback(() => setVersionsKey((k) => k + 1), []);
 
   const fixError = (text: string) => setQueued({ text: `Fix this error in the app:\n\n${text.slice(-2000)}` });
@@ -670,7 +678,12 @@ function ChatPanel({
   onClearSelection(): void;
 }) {
   const [messages, setMessages] = useState<MessageRecord[] | null>(null);
-  const [draft, setDraft] = useState("");
+  // An unsent message survives switching chats or apps.
+  const [draft, setDraft] = useState(() => localStorage.getItem(`atelier.draft.${chatId}`) ?? "");
+  useEffect(() => {
+    if (draft) localStorage.setItem(`atelier.draft.${chatId}`, draft);
+    else localStorage.removeItem(`atelier.draft.${chatId}`);
+  }, [chatId, draft]);
   const [streaming, setStreaming] = useState<MessageRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
