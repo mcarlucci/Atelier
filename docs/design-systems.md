@@ -1,5 +1,7 @@
 # Importing a design system
 
+On first launch the home screen shows the import form. Enter your package, or click a popular library to import it in one step. Atelier then asks for an AI model if none is set, and you can describe your first screen.
+
 [← Back to README](../README.md)
 
 Atelier imports a design system from an npm package (public or private registry) or a local built package folder. The package is installed with `--ignore-scripts`, and its TypeScript declarations are read with the TypeScript compiler API:

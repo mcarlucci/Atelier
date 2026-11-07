@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ComponentInfo, DesignSystem, FrameworkId } from "@shared/types";
+import { importStage } from "@shared/importStages";
 import { api, errorMessage } from "../api";
 import type { Route } from "../App";
 import { defaultTemplateFor, FRAMEWORK_LABELS, FRAMEWORK_PACKAGE, isCompatible, type TemplateInfo } from "@shared/templates";
@@ -82,7 +83,7 @@ const POPULAR: { spec: string; framework: FrameworkId }[] = [
 ];
 
 /** The latest import step reported by the main process while `active`. */
-function useImportProgress(active: boolean): string {
+export function useImportProgress(active: boolean): string {
   const [step, setStep] = useState("");
   useEffect(() => {
     if (!active) return;
@@ -95,7 +96,7 @@ function useImportProgress(active: boolean): string {
   return step;
 }
 
-function ImportForm({ onImported }: { onImported(ds: DesignSystem): void }) {
+export function ImportForm({ onImported, embedded }: { onImported(ds: DesignSystem): void; embedded?: boolean }) {
   const [kind, setKind] = useState<"npm" | "local">("npm");
   const [spec, setSpec] = useState("");
   const [registry, setRegistry] = useState("");
@@ -106,15 +107,21 @@ function ImportForm({ onImported }: { onImported(ds: DesignSystem): void }) {
   const [error, setError] = useState<string | null>(null);
   const step = useImportProgress(busy);
 
-  const submit = async () => {
+  // `pick` imports a popular package straight away, with no registry or framework override.
+  const submit = async (pick?: string) => {
     setBusy(true);
     setError(null);
     try {
-      const ds = await api.invoke("ds:import", {
-        source: kind === "npm" ? { kind, spec: spec.trim(), registry: registry.trim() || undefined } : { kind, path: localPath },
-        authToken: kind === "npm" && token.trim() ? token.trim() : undefined,
-        framework: framework === "auto" ? undefined : framework,
-      });
+      const ds = await api.invoke(
+        "ds:import",
+        pick
+          ? { source: { kind: "npm", spec: pick } }
+          : {
+              source: kind === "npm" ? { kind, spec: spec.trim(), registry: registry.trim() || undefined } : { kind, path: localPath },
+              authToken: kind === "npm" && token.trim() ? token.trim() : undefined,
+              framework: framework === "auto" ? undefined : framework,
+            },
+      );
       onImported(ds);
     } catch (e) {
       setError(errorMessage(e));
@@ -124,13 +131,17 @@ function ImportForm({ onImported }: { onImported(ds: DesignSystem): void }) {
   };
 
   return (
-    <div className="page-scroll">
-      <h1>Import a design system</h1>
-      <p className="muted">
-        Enter the npm package of any React, Vue or Angular component library. Atelier finds its components, stylesheet,
-        theme and framework for you, and the AI builds screens only from them.
-      </p>
-      <section className="card form">
+    <div className={embedded ? "wiz-import" : "page-scroll"}>
+      {!embedded && (
+        <>
+          <h1>Import a design system</h1>
+          <p className="muted">
+            Enter the npm package of any React, Vue or Angular component library. Atelier finds its components, stylesheet,
+            theme and framework for you, and the AI builds screens only from them.
+          </p>
+        </>
+      )}
+      <section className={embedded ? "form" : "card form"}>
         <ToggleGroup
           label="Source"
           value={kind}
@@ -143,10 +154,10 @@ function ImportForm({ onImported }: { onImported(ds: DesignSystem): void }) {
         {kind === "npm" ? (
           <>
             <TextField label="Package" placeholder="@acme/design-system or vuetify@^3" value={spec} onValue={setSpec} />
-            <div className="row wrap" role="group" aria-label="Popular libraries">
-              <span className="muted small">Try:</span>
+            <div className="row wrap" role="group" aria-label="Popular libraries" hidden={embedded}>
+              <span className="muted small">Not ready? Import one:</span>
               {POPULAR.map((p) => (
-                <button key={p.spec} className="chip-btn" disabled={busy} onClick={() => setSpec(p.spec)} title={FRAMEWORK_LABELS[p.framework]}>
+                <button key={p.spec} className="chip-btn" disabled={busy} onClick={() => void submit(p.spec)} title={FRAMEWORK_LABELS[p.framework]}>
                   {p.spec}
                 </button>
               ))}
@@ -193,13 +204,16 @@ function ImportForm({ onImported }: { onImported(ds: DesignSystem): void }) {
           </div>
         </details>
         <div>
-          <button className="primary" disabled={busy || (kind === "npm" ? !spec.trim() : !localPath)} onClick={submit}>
+          <button className="primary" disabled={busy || (kind === "npm" ? !spec.trim() : !localPath)} onClick={() => void submit()}>
             {busy ? "Importing…" : "Import"}
           </button>
         </div>
         {busy && (
           <>
             <Progress label="Importing" />
+            <p className="small">
+              <b>{importStage(step).title}.</b> <span className="muted">{importStage(step).why}</span>
+            </p>
             <p className="muted small truncate">{step || "Starting…"}</p>
           </>
         )}
@@ -209,7 +223,20 @@ function ImportForm({ onImported }: { onImported(ds: DesignSystem): void }) {
           </Alert>
         )}
       </section>
-      <details className="card advanced">
+      {embedded && (
+        <>
+          <div className="wiz-or">or pick a library to try</div>
+          <div className="pick-grid" role="group" aria-label="Popular libraries">
+            {POPULAR.map((p) => (
+              <button key={p.spec} className="pick" disabled={busy} onClick={() => void submit(p.spec)}>
+                <b>{p.spec}</b>
+                <span className="muted small">{FRAMEWORK_LABELS[p.framework]}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+      {!embedded && <details className="card advanced">
         <summary>Optional: ship a manifest with your package</summary>
         <p className="muted">
           Add <code>atelier.manifest.json</code> to the package root to supply guidelines, setup, tokens, and per-component
@@ -224,7 +251,7 @@ function ImportForm({ onImported }: { onImported(ds: DesignSystem): void }) {
     "LegacyTable": { "enabled": false }
   }
 }`}</pre>
-      </details>
+      </details>}
     </div>
   );
 }

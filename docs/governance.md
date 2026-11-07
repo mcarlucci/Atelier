@@ -26,7 +26,7 @@ Atelier also installs Playwright and the Chromium browser in the background (abo
 
 Atelier points Invariant at the design system package installed in the app (`node_modules/<package>`, with `declarations: true` in `invariant.config.json`) and reads its `.d.ts` files. Components are recognised by their declared types: `ForwardRefExoticComponent`, `FC`, `ComponentType`, functions that return `JSX.Element` or `ReactNode`, classes that extend `Component`, and compound objects such as `{ Root: typeof DialogRoot }`. If the package isn't installed yet, or no components are found, the tab says so and Atelier falls back to its own design system check.
 
-Not covered yet: Vue and Angular declarations, `memo()` components declared as `MemoExoticComponent<…>`, and tokens.
+Vue (`DefineComponent`, construct-signature components, `SFCWithInstall<typeof X>`) and Angular declarations are read too. Components declared through another package's wrapper type (MUI's `OverridableComponent`) are found, but their props are not resolved. Not covered yet: `memo()` components declared as `MemoExoticComponent<…>`, and tokens. A contract should never hold fewer components than Atelier's import lists; `tests/invariant.parity.test.ts` checks this (`ATELIER_INTEGRATION=1`).
 
 The contract is compiled once per design system and copied into each app, together with an `invariant.config.json`. It lives in the app's `node_modules/.invariant` so the app's dev server doesn't reload the preview. A reinstall (`npm ci`) removes it; it comes back the next time the app is opened or the design system is recompiled.
 
@@ -35,4 +35,4 @@ The contract is compiled once per design system and copied into each app, togeth
 - **Local only.** Invariant uses no account, cloud or network. Recompiling unchanged sources gives identical output.
 - **Bundled copy.** Atelier ships one copy of Invariant UI (about 44 MB, plain JavaScript) and runs it with Atelier's own Node.js. Invariant requires Node.js 24 or newer; Atelier's bundled Node.js qualifies.
 - **License.** Invariant UI is source-available under FSL-1.1-ALv2 and becomes Apache-2.0 two years after each release. See `THIRD_PARTY_NOTICES.md`.
-- **Developing Atelier.** Run `npm run fetch-invariant -- --from <path to invariant/dist-npm>` once to place it in `resources/invariant` (build it with `pnpm run build:npm` in the Invariant repo). Release builds do this in CI from a pinned commit of the Invariant repo, which must include declaration-file support (`declarations: true`).
+- **Developing Atelier.** Run `npm run fetch-invariant -- --from <path to invariant/dist-npm>` once to place it in `resources/invariant` (build it with `pnpm run build:npm` in the Invariant repo). Release builds do this in CI from a pinned commit of the Invariant repo, which must include declaration-file support for React, Vue and Angular (`declarations: true`).
