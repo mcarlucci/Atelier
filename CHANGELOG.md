@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/mcarlucci/Atelier/compare/v0.7.0...v0.7.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* bundle an Invariant UI build that supports declarations ([#21](https://github.com/mcarlucci/Atelier/issues/21)) ([71078e6](https://github.com/mcarlucci/Atelier/commit/71078e6ceb9488cd3dfcee536c71122219357bf8))
+
 ## [0.7.0](https://github.com/mcarlucci/Atelier/compare/v0.6.2...v0.7.0) (2026-11-06)
 
 
