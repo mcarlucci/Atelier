@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { ConnectorView } from "@shared/connectors";
 import { PREVIEW_SELECT_MESSAGE } from "@shared/ipc";
+import type { InvariantValidateResult } from "@shared/invariant";
 import type { PreviewEdit, SelectedElement } from "@shared/types";
 import type { AppRecord, ChatRecord, DesignSystem, MessageRecord, RunnerStatus, VersionInfo } from "@shared/types";
 import { api, errorMessage } from "../api";
@@ -22,14 +23,17 @@ const tabLabel = (icon: IconName, text: string) => (
     {text}
   </span>
 );
-const TABS = [
+/** `issues` is the violation count of the last automatic check, or null before one has run. */
+const tabs = (issues: number | null) => [
   { id: "preview", label: tabLabel("eye", "Preview") },
   { id: "code", label: tabLabel("code", "Code") },
-  { id: "checks", label: tabLabel("check", "Checks") },
+  { id: "checks", label: tabLabel("check", issues === null ? "Checks" : issues === 0 ? "Checks ✓" : `Checks (${issues})`) },
   { id: "versions", label: tabLabel("history", "Versions") },
 ];
 const DEVICES = { desktop: "100%", tablet: "768px", mobile: "390px" } as const;
 type Device = keyof typeof DEVICES;
+/** Next steps offered after every build; each one is a prompt that works on any screen. */
+const FOLLOW_UPS = ["Add loading and empty states", "Make it work on a phone", "Add form validation and error messages"];
 const MAX_CONSOLE_CHARS = 200_000;
 const CHAT_WIDTH_KEY = "atelier.chatWidth";
 const MIN_CHAT = 340;
@@ -45,12 +49,33 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
   const [ds, setDs] = useState<DesignSystem | null>(null);
   const [chats, setChats] = useState<ChatRecord[]>([]);
   const [chatId, setChatId] = useState<string | null>(null);
-  const [tab, setTab] = useState<string>("preview");
+  // The tab each app was last left on, so reopening picks up where the user was.
+  const [tab, setTabState] = useState<string>(() => localStorage.getItem(`atelier.tab.${appId}`) ?? "preview");
+  const setTab = useCallback(
+    (id: string) => {
+      setTabState(id);
+      localStorage.setItem(`atelier.tab.${appId}`, id);
+    },
+    [appId],
+  );
   const [status, setStatus] = useState<RunnerStatus>({ state: "stopped" });
   const [consoleText, setConsoleText] = useState("");
   const [errorCount, setErrorCount] = useState(0);
   const [lastError, setLastError] = useState("");
   const [versionsKey, setVersionsKey] = useState(0);
+  // Code checks run by themselves after each build, so the result is already there.
+  const [autoCheck, setAutoCheck] = useState<InvariantValidateResult | undefined>();
+  useEffect(() => {
+    if (versionsKey === 0) return;
+    let live = true;
+    api.invoke("invariant:validate", appId).then(
+      (r) => live && setAutoCheck(r),
+      () => live && setAutoCheck(undefined),
+    );
+    return () => {
+      live = false;
+    };
+  }, [appId, versionsKey]);
   const [queued, setQueued] = useState<Queued | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [selection, setSelection] = useState<SelectedElement | null>(null);
@@ -102,6 +127,10 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
     setVersionsKey((k) => k + 1);
     void api.invoke("chat:list", appId).then(setChats);
   }, [appId]);
+
+  // A finished build lands on the preview, where the result is.
+  const onBuilt = useCallback(() => setTab("preview"), [setTab]);
+  const onVersionsChanged = useCallback(() => setVersionsKey((k) => k + 1), []);
 
   const fixError = (text: string) => setQueued({ text: `Fix this error in the app:\n\n${text.slice(-2000)}` });
 
@@ -198,6 +227,9 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
             onClearSelection={() => setSelection(null)}
             onQueuedSent={() => setQueued(null)}
             onTurnDone={onTurnDone}
+            onBuilt={onBuilt}
+            onOpenVersions={() => setTab("versions")}
+            onVersionsChanged={onVersionsChanged}
             onOpenSettings={() => navigate({ page: "settings" })}
             onOpenConnectors={() => navigate({ page: "connectors" })}
           />
@@ -229,7 +261,7 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
             </button>
           </Tooltip>
         </Toolbar>
-        <Tabs label="Workspace views" value={tab} onValue={setTab} tabs={TABS} className="workspace-tabs">
+        <Tabs label="Workspace views" value={tab} onValue={setTab} tabs={tabs(autoCheck ? autoCheck.violations.length : null)} className="workspace-tabs">
           <TabPanel name="preview" className="tab-body">
             <PreviewView
               appId={appId}
@@ -250,11 +282,20 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
               appId={appId}
               ds={ds}
               refreshKey={versionsKey}
+              autoResult={autoCheck}
+              onFix={(text) => setQueued({ text })}
               onOpenCompliance={() => app && navigate({ page: "design-systems", selectedId: app.designSystemId, tab: "compliance" })}
             />
           </TabPanel>
           <TabPanel name="versions" className="tab-body">
-            <VersionsView appId={appId} refreshKey={versionsKey} onRestored={() => setVersionsKey((k) => k + 1)} />
+            <VersionsView
+              appId={appId}
+              refreshKey={versionsKey}
+              onRestored={() => {
+                setVersionsKey((k) => k + 1);
+                void api.invoke("settings:set", { progress: { restored: Date.now() } });
+              }}
+            />
           </TabPanel>
         </Tabs>
         <ConsoleDrawer
@@ -614,6 +655,9 @@ function ChatPanel({
   queued,
   onQueuedSent,
   onTurnDone,
+  onBuilt,
+  onOpenVersions,
+  onVersionsChanged,
   onOpenSettings,
   onOpenConnectors,
   selection,
@@ -625,13 +669,21 @@ function ChatPanel({
   queued: Queued | null;
   onQueuedSent(): void;
   onTurnDone(): void;
+  onBuilt(): void;
+  onOpenVersions(): void;
+  onVersionsChanged(): void;
   onOpenSettings(): void;
   onOpenConnectors(): void;
   selection: SelectedElement | null;
   onClearSelection(): void;
 }) {
   const [messages, setMessages] = useState<MessageRecord[] | null>(null);
-  const [draft, setDraft] = useState("");
+  // An unsent message survives switching chats or apps.
+  const [draft, setDraft] = useState(() => localStorage.getItem(`atelier.draft.${chatId}`) ?? "");
+  useEffect(() => {
+    if (draft) localStorage.setItem(`atelier.draft.${chatId}`, draft);
+    else localStorage.removeItem(`atelier.draft.${chatId}`);
+  }, [chatId, draft]);
   const [streaming, setStreaming] = useState<MessageRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -658,14 +710,23 @@ function ChatPanel({
     const offDone = api.on("chat:done", (e) => {
       if (e.chatId !== chatId) return;
       setStreaming(null);
-      void api.invoke("chat:messages", chatId).then(setMessages);
+      void api.invoke("chat:messages", chatId).then((list) => {
+        setMessages(list);
+        const last = list.at(-1);
+        if (last?.role !== "assistant" || !last.actions?.written.length) return;
+        toast("Your screen is ready", "success");
+        onBuilt();
+        composerFocus.current?.();
+        // Milestones for the home page checklist; each keeps the date it was first reached.
+        void api.invoke("settings:set", { progress: { firstBuild: Date.now(), ...(last.compliance?.length === 0 ? { compliancePass: Date.now() } : {}) } });
+      });
       onTurnDone();
     });
     return () => {
       offChunk();
       offDone();
     };
-  }, [chatId, onTurnDone]);
+  }, [chatId, onTurnDone, onBuilt]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
@@ -705,6 +766,22 @@ function ChatPanel({
     void send(queued.text);
   });
 
+  // Goes back to the version before the one this message made.
+  const undo = async (hash: string) => {
+    const versions = await api.invoke("app:versions", app.id);
+    const at = versions.findIndex((v) => v.hash.startsWith(hash));
+    const previous = at >= 0 ? versions[at + 1] : undefined;
+    if (!previous) return toast("There is nothing earlier to go back to.", "warning");
+    try {
+      await api.invoke("app:restore-version", app.id, previous.hash);
+      toast("Undone. The previous version is back.", "success");
+      onVersionsChanged();
+      void api.invoke("settings:set", { progress: { restored: Date.now() } });
+    } catch (e) {
+      toast(errorMessage(e), "danger");
+    }
+  };
+
   const fixCompliance = (m: MessageRecord) => {
     const list = (m.compliance ?? []).map((i) => `- ${i.file}:${i.line} ${i.message}`).join("\n");
     void send(`Fix these design system issues so the app only uses ${ds.name}:\n${list}`);
@@ -737,8 +814,31 @@ function ChatPanel({
               </div>
             </div>
           )}
-          {messages?.map((m) => <MessageView key={m.id} message={m} onFixCompliance={busy ? undefined : fixCompliance} />)}
+          {messages?.map((m, i) => {
+            const latest = i === messages.length - 1 && !busy;
+            return (
+              <MessageView
+                key={m.id}
+                message={m}
+                dsName={ds.name}
+                onFixCompliance={busy ? undefined : fixCompliance}
+                onOpenVersions={onOpenVersions}
+                onUndo={latest && m.actions?.commitHash ? () => void undo(m.actions!.commitHash!) : undefined}
+              />
+            );
+          })}
           {streaming && <MessageView message={streaming} streaming />}
+          {!busy && messages?.at(-1)?.role === "assistant" && (messages.at(-1)?.actions?.written.length ?? 0) > 0 && (
+            <div className="ideas follow-ups">
+              <span className="muted small">What next?</span>
+              {FOLLOW_UPS.map((f) => (
+                <button key={f} className="idea" onClick={() => void send(f)}>
+                  <Icon name="sparkles" size={14} />
+                  {f}
+                </button>
+              ))}
+            </div>
+          )}
           <div ref={endRef} />
         </div>
       </div>

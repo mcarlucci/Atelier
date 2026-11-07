@@ -146,14 +146,19 @@ export class Services {
       providers,
       lastDesignSystemId: s.lastDesignSystemId,
       lastTemplateId: s.lastTemplateId,
+      progress: s.progress,
     };
   }
 
   /** `model` applies to the active provider. */
-  async setSettings(patch: Partial<Pick<Settings, "model" | "effort" | "appsFolder" | "lastDesignSystemId" | "lastTemplateId">>): Promise<Settings> {
-    const { model, ...rest } = patch;
+  async setSettings(patch: Partial<Pick<Settings, "model" | "effort" | "appsFolder" | "lastDesignSystemId" | "lastTemplateId" | "progress">>): Promise<Settings> {
+    const { model, progress, ...rest } = patch;
     if (model !== undefined) await this.configureProvider(this.getSettings().provider, { model });
-    this.store.update((d) => Object.assign(d.settings, rest));
+    this.store.update((d) => {
+      Object.assign(d.settings, rest);
+      // A milestone keeps the date it was first reached.
+      if (progress) d.settings.progress = { ...progress, ...d.settings.progress };
+    });
     return this.getSettings();
   }
 

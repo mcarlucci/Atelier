@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ComponentInfo, DesignSystem, FrameworkId } from "@shared/types";
-import { importStage } from "@shared/importStages";
+import { IMPORT_STAGES, importStage } from "@shared/importStages";
+import { POPULAR } from "@shared/popular";
 import { api, errorMessage } from "../api";
 import type { Route } from "../App";
 import { defaultTemplateFor, FRAMEWORK_LABELS, FRAMEWORK_PACKAGE, isCompatible, type TemplateInfo } from "@shared/templates";
@@ -69,18 +70,6 @@ export default function DesignSystemsPage({ selectedId, tab, navigate }: { selec
     </div>
   );
 }
-
-/** One-click starting points, one per publishing style Atelier handles. */
-const POPULAR: { spec: string; framework: FrameworkId }[] = [
-  { spec: "@mui/material", framework: "react" },
-  { spec: "@mantine/core", framework: "react" },
-  { spec: "@radix-ui/themes", framework: "react" },
-  { spec: "vuetify", framework: "vue" },
-  { spec: "primevue", framework: "vue" },
-  { spec: "element-plus", framework: "vue" },
-  { spec: "primeng", framework: "angular" },
-  { spec: "@angular/material", framework: "angular" },
-];
 
 /** The latest import step reported by the main process while `active`. */
 export function useImportProgress(active: boolean): string {
@@ -212,7 +201,10 @@ export function ImportForm({ onImported, embedded }: { onImported(ds: DesignSyst
           <>
             <Progress label="Importing" />
             <p className="small">
-              <b>{importStage(step).title}.</b> <span className="muted">{importStage(step).why}</span>
+              <b>
+                Step {importStage(step).n} of {IMPORT_STAGES}: {importStage(step).title}.
+              </b>{" "}
+              <span className="muted">{importStage(step).why}</span>
             </p>
             <p className="muted small truncate">{step || "Starting…"}</p>
           </>
@@ -228,9 +220,14 @@ export function ImportForm({ onImported, embedded }: { onImported(ds: DesignSyst
           <div className="wiz-or">or pick a library to try</div>
           <div className="pick-grid" role="group" aria-label="Popular libraries">
             {POPULAR.map((p) => (
-              <button key={p.spec} className="pick" disabled={busy} onClick={() => void submit(p.spec)}>
-                <b>{p.spec}</b>
-                <span className="muted small">{FRAMEWORK_LABELS[p.framework]}</span>
+              <button key={p.spec} className={`pick${p.recommended ? " recommended" : ""}`} disabled={busy} onClick={() => void submit(p.spec)}>
+                <b>
+                  {p.spec}
+                  {p.recommended && <span className="tag accent">Recommended</span>}
+                </b>
+                <span className="muted small">
+                  {FRAMEWORK_LABELS[p.framework]} · {p.blurb}
+                </span>
               </button>
             ))}
           </div>

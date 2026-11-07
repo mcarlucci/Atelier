@@ -193,7 +193,14 @@ export default function MessageView({
   message,
   streaming,
   onFixCompliance,
+  dsName,
+  onOpenVersions,
+  onUndo,
 }: {
+  dsName?: string;
+  onOpenVersions?(): void;
+  /** Set only on the latest message of a finished turn. */
+  onUndo?(): void;
   message: MessageRecord;
   streaming?: boolean;
   onFixCompliance?(m: MessageRecord): void;
@@ -239,16 +246,28 @@ export default function MessageView({
       )}
       {(actions?.commitHash || (message.compliance && message.compliance.length === 0 && actions && actions.written.length > 0)) && (
         <div className="msg-meta">
-          {actions?.commitHash && (
-            <span className="meta-pill">
-              <Icon name="history" size={12} />
-              Version {actions.commitHash.slice(0, 7)}
-            </span>
+          {actions?.commitHash &&
+            (onOpenVersions ? (
+              <button className="meta-pill" onClick={onOpenVersions} title="Open versions">
+                <Icon name="history" size={12} />
+                Version {actions.commitHash.slice(0, 7)}
+              </button>
+            ) : (
+              <span className="meta-pill">
+                <Icon name="history" size={12} />
+                Version {actions.commitHash.slice(0, 7)}
+              </span>
+            ))}
+          {onUndo && (
+            <button className="meta-pill" onClick={onUndo} title="Go back to the version before this change">
+              <Icon name="arrowLeft" size={12} />
+              Undo
+            </button>
           )}
           {message.compliance && message.compliance.length === 0 && actions && actions.written.length > 0 && (
             <span className="meta-pill ok">
               <Icon name="check" size={12} />
-              Design system check passed
+              {dsName ? `Compliant with ${dsName}` : "Design system check passed"}
             </span>
           )}
         </div>
