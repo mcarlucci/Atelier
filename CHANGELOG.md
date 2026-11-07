@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/mcarlucci/Atelier/compare/v0.8.1...v0.8.2) (2026-11-07)
+
+
+### Bug Fixes
+
+* pin an Invariant UI build whose contracts stay valid ([#30](https://github.com/mcarlucci/Atelier/issues/30)) ([3d2d1a0](https://github.com/mcarlucci/Atelier/commit/3d2d1a004c06d28c4cc8e5f30d5de8118c412af0))
+
 ## [0.8.1](https://github.com/mcarlucci/Atelier/compare/v0.8.0...v0.8.1) (2026-11-07)
 
 
