@@ -61,7 +61,7 @@ jobs:
       # Pinned: the bundled Invariant UI must not change between rebuilds of the same tag.
       - name: Build Invariant UI
         env:
-          INVARIANT_REF: 552d6773b430599b5ceee0f3786456b869cb6f5b
+          INVARIANT_REF: ba86176be8152da885cfafac0fcd9b3257129fdf
         run: |
           git clone https://github.com/mcarlucci/invariant.git "$RUNNER_TEMP/invariant"
           git -C "$RUNNER_TEMP/invariant" checkout "$INVARIANT_REF"
