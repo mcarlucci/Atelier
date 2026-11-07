@@ -119,12 +119,12 @@ function ActionCard({ seg }: { seg: Extract<Segment, { kind: "action" }> }) {
   );
 }
 
-const GOVERNANCE_PREFIX = "Invariant UI · ";
-const isGovernance = (s: Segment): s is ToolSeg => s.kind === "tool" && s.label.startsWith(GOVERNANCE_PREFIX);
+const COMPLIANCE_PREFIX = "Invariant UI · ";
+const isCompliance = (s: Segment): s is ToolSeg => s.kind === "tool" && s.label.startsWith(COMPLIANCE_PREFIX);
 type ToolSeg = Extract<Segment, { kind: "tool" }>;
 
-/** The design system contract tools the model called, shown together so governance is visible. */
-function GovernanceCard({ calls }: { calls: ToolSeg[] }) {
+/** The design system contract tools the model called, shown together so compliance is visible. */
+function ComplianceCard({ calls }: { calls: ToolSeg[] }) {
   const failed = calls.filter((c) => c.error).length;
   return (
     <div className="action-card">
@@ -132,7 +132,7 @@ function GovernanceCard({ calls }: { calls: ToolSeg[] }) {
         <span className="action-icon">
           <Icon name="shield" size={14} />
         </span>
-        <span className="action-verb">Governance</span>
+        <span className="action-verb">Compliance</span>
         <span className="action-target truncate">
           <strong>
             {calls.length} contract {calls.length === 1 ? "check" : "checks"}
@@ -148,7 +148,7 @@ function GovernanceCard({ calls }: { calls: ToolSeg[] }) {
           {calls.map((c, i) => (
             <li key={i} className={c.error ? "error" : ""}>
               <Icon name={c.error ? "alert" : "plug"} size={12} />
-              <b>{c.label.slice(GOVERNANCE_PREFIX.length)}</b>
+              <b>{c.label.slice(COMPLIANCE_PREFIX.length)}</b>
               {c.detail && (
                 <span className="muted truncate" title={c.detail}>
                   {c.detail}
@@ -214,12 +214,12 @@ export default function MessageView({
       {segs.map((s, i) => {
         if (s.kind === "text") return <Markdown key={i} text={s.text.trim()} />;
         if (s.kind === "action") return <ActionCard key={i} seg={s} />;
-        if (!isGovernance(s)) return <ToolCard key={i} seg={s} />;
+        if (!isCompliance(s)) return <ToolCard key={i} seg={s} />;
         // One card per run of consecutive contract calls, rendered at the run's first call.
-        if (i > 0 && isGovernance(segs[i - 1])) return null;
+        if (i > 0 && isCompliance(segs[i - 1])) return null;
         const calls: ToolSeg[] = [];
-        for (let j = i; j < segs.length && isGovernance(segs[j]); j++) calls.push(segs[j] as ToolSeg);
-        return <GovernanceCard key={i} calls={calls} />;
+        for (let j = i; j < segs.length && isCompliance(segs[j]); j++) calls.push(segs[j] as ToolSeg);
+        return <ComplianceCard key={i} calls={calls} />;
       })}
       {streaming && (segs.length === 0 || last?.kind === "tool" || (last?.kind === "action" && !last.pending)) && (
         <ThinkingDots label={segs.length ? "Working" : "Thinking"} />

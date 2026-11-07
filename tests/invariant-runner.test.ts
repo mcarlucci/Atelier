@@ -92,7 +92,7 @@ describe("InvariantRunner", () => {
     const appDir = fs.mkdtempSync(path.join(os.tmpdir(), "inv-app-"));
 
     expect(runner.playwrightReady()).toBe(false);
-    await expect(runner.browserRun(appDir, "http://127.0.0.1:1/")).rejects.toThrow(/Install it from the Governance tab/);
+    await expect(runner.browserRun(appDir, "http://127.0.0.1:1/")).rejects.toThrow(/Install it from the Compliance tab/);
 
     await Promise.all([runner.installPlaywright(), runner.installPlaywright()]);
     await runner.installPlaywright();

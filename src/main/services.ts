@@ -294,7 +294,7 @@ export class Services {
       encryptedAuthToken: input.authToken ? await this.deps.secrets.encrypt(input.authToken) : undefined,
     };
     this.store.update((d) => d.designSystems.push(stored));
-    await this.setupGovernance(id);
+    await this.setupCompliance(id);
     return publicDs(this.storedDs(id));
   }
 
@@ -320,7 +320,7 @@ export class Services {
       onLog: (line) => this.deps.emit("ds:import-progress", { line }),
     });
     this.replaceDs({ ...fresh, defaultTemplateId: current.defaultTemplateId, encryptedAuthToken: current.encryptedAuthToken });
-    await this.setupGovernance(id);
+    await this.setupCompliance(id);
     return publicDs(this.storedDs(id));
   }
 
@@ -499,7 +499,7 @@ export class Services {
    * node_modules, and starts installing Playwright for browser checks in the background. Problems are
    * recorded on the design system and never fail the import.
    */
-  private async setupGovernance(id: string): Promise<void> {
+  private async setupCompliance(id: string): Promise<void> {
     await this.compileDesignSystem(id);
     if (this.deps.skipBrowserInstall) return;
     void this.invariant
@@ -560,7 +560,7 @@ export class Services {
       }
       fs.writeFileSync(this.invariantMarker(app.path), `${JSON.stringify({ components: compiled.components, tokens: 0, fromDs: compiled.compiledAt })}\n`);
     } catch {
-      // The app can still compile its own contract from the Governance tab.
+      // The app can still compile its own contract from the Compliance tab.
     }
   }
 

@@ -1,4 +1,4 @@
-# Governance with Invariant UI
+# Compliance with Invariant UI
 
 [← Back to README](../README.md)
 
@@ -6,7 +6,7 @@ Atelier bundles [Invariant UI](https://invariantui.com), a tool that compiles a 
 
 - **While the AI builds.** The model can read the contract through read-only tools (`Invariant_UI__get_component`, `get_design_patterns`, `validate_component_usage` and others). Each call shows in the chat. The system prompt tells it to follow approved patterns and to treat proposed or inferred ones as suggestions.
 - **After each turn.** The files the turn wrote are validated against the contract. Findings join the design system check under the message, labeled "(Invariant UI)".
-- **On the design system's Governance tab** (Settings > Design systems > pick one > Governance), which also holds the team's Guidelines and the AI rules preview:
+- **On the design system's Compliance tab** (Settings > Design systems > pick one > Compliance), which also holds the team's Guidelines and the AI rules preview:
   - **Contract:** component count, when it was compiled, any error, and a Recompile button.
   - **Browser checks:** whether Playwright and Chromium are installed, with an Install button.
   - **Guidelines:** the free-text usage rules sent with every request.
@@ -14,13 +14,13 @@ Atelier bundles [Invariant UI](https://invariantui.com), a tool that compiles a 
 - **On an app's Checks tab** in the workspace (next to Preview, Code and Versions):
   - **Code checks:** validate the whole `src` folder. Pattern rules are counted as pass, fail, warning, not verifiable and skipped. Not verifiable results are never counted as passes.
   - **Browser checks:** run Invariant's opt-in Playwright checks in a real Chromium against the running dev server. The app must be running. Every app gets a default spec with no setup: the page mounts content and shows no build error at phone, tablet and desktop widths, declares its language, and every image has alt text. To add your own scenarios, put an `invariant.browser.json` in the app's root (Invariant's browser spec format); it replaces the default. An app's own Playwright copy takes priority over Atelier's.
-  - A link back to the design system's Governance tab.
+  - A link back to the design system's Compliance tab.
 
 ## What happens on import
 
 When you import a design system, Atelier compiles its contract right away, in the design system's own install folder, and shows the component count it found. New apps (and existing apps on that design system) receive that contract automatically, so the app's Checks tab works without any setup. Re-importing recompiles it. If the compile fails, the reason is stored with the design system and the app falls back to Atelier's own design system check. Apps no longer have a Compile button. An app that was compiled on its own earlier keeps its own contract; use Recompile on the design system for the shared one.
 
-Atelier also installs Playwright and the Chromium browser in the background (about 150 MB, once, shared by every app), so browser checks work without touching the app's `package.json`. If that install fails or is skipped, the Governance tab has an Install button.
+Atelier also installs Playwright and the Chromium browser in the background (about 150 MB, once, shared by every app), so browser checks work without touching the app's `package.json`. If that install fails or is skipped, the Compliance tab has an Install button.
 
 ## What it reads
 
