@@ -2462,3 +2462,51 @@ slab-disclosure.files-disclosure::part(summary) {
   flex: none;
   font-weight: 500;
 }
+
+.pick b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pick.recommended {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+}
+
+.wiz-done {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.wiz-done ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wiz-done li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wiz-done li .icon {
+  color: var(--accent);
+}
+
+.create-progress {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-progress p {
+  margin: 0;
+}

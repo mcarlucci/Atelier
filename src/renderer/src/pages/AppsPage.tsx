@@ -8,25 +8,28 @@ import AppNameInput from "../components/AppNameInput";
 import SetupWizard from "../components/SetupWizard";
 import ModelMenu from "../components/ModelMenu";
 import PromptBox from "../components/PromptBox";
+import { rankIdeas } from "@shared/ideas";
 import { nameFromPrompt, relativeTime } from "../format";
 import { Icon, type IconName } from "../ui/icons";
-import { Alert, Menu, MenuItem, Pagination, Select, TextField, toast, useConfirm } from "../ui/slab";
+import { Alert, Menu, MenuItem, Pagination, Progress, Select, TextField, toast, useConfirm } from "../ui/slab";
 
-const IDEAS: { icon: IconName; title: string; prompt: string }[] = [
-  { icon: "form", title: "Settings page", prompt: "A settings page for notification preferences, grouped into sections, with a save confirmation" },
-  { icon: "chart", title: "Analytics dashboard", prompt: "An analytics dashboard with KPI cards, a date range filter and a table of recent activity" },
-  { icon: "users", title: "Team directory", prompt: "A team directory with search, role filters and a detail panel for each person" },
-  { icon: "layout", title: "Onboarding flow", prompt: "A three-step onboarding flow with a progress indicator, validation and a summary step" },
-  { icon: "cart", title: "Checkout", prompt: "A checkout page with a cart summary, shipping form, payment method choice and order confirmation" },
-  { icon: "bell", title: "Notification center", prompt: "A notification center with unread badges, filters by type and mark-all-as-read" },
-  { icon: "message", title: "Support inbox", prompt: "A support inbox with a conversation list, a message thread and a reply composer" },
-  { icon: "package", title: "Product catalog", prompt: "A product catalog with category filters, sorting, and a product detail dialog" },
+const IDEAS: { icon: IconName; title: string; needs: string[]; prompt: string }[] = [
+  { icon: "form", title: "Settings page", needs: ["switch","toggle","checkbox","tabs"], prompt: "A settings page for notification preferences, grouped into sections, with a save confirmation" },
+  { icon: "chart", title: "Analytics dashboard", needs: ["card","table","chart","select"], prompt: "An analytics dashboard with KPI cards, a date range filter and a table of recent activity" },
+  { icon: "users", title: "Team directory", needs: ["table","avatar","input","list"], prompt: "A team directory with search, role filters and a detail panel for each person" },
+  { icon: "layout", title: "Onboarding flow", needs: ["step","progress","button","input"], prompt: "A three-step onboarding flow with a progress indicator, validation and a summary step" },
+  { icon: "cart", title: "Checkout", needs: ["input","select","radio","button"], prompt: "A checkout page with a cart summary, shipping form, payment method choice and order confirmation" },
+  { icon: "bell", title: "Notification center", needs: ["badge","tabs","list","alert"], prompt: "A notification center with unread badges, filters by type and mark-all-as-read" },
+  { icon: "message", title: "Support inbox", needs: ["list","input","avatar","textarea"], prompt: "A support inbox with a conversation list, a message thread and a reply composer" },
+  { icon: "package", title: "Product catalog", needs: ["card","dialog","select","badge"], prompt: "A product catalog with category filters, sorting, and a product detail dialog" },
 ];
 const IDEAS_SHOWN = 4;
 const APPS_PER_PAGE = 6;
 
 export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppRecord[]; onAppsChanged(): void; navigate(r: Route): void }) {
   const [skipped, setSkipped] = useState(false);
+  // Decided once on load, then kept until the user continues, so the "You're set" step is not skipped.
+  const [wizard, setWizard] = useState<boolean | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [systems, setSystems] = useState<DesignSystem[] | null>(null);
   const [dsId, setDsId] = useState("");
@@ -50,6 +53,7 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
       setSettings(settings);
       setTemplates(tpls);
       setSystems(list);
+      setWizard(list.length === 0 || !settings.ready);
       // The last design system and template used, while they still exist and fit each other.
       const ds = list.find((s) => s.id === settings.lastDesignSystemId) ?? list[0];
       if (ds) {
@@ -58,6 +62,9 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
         setDsId(ds.id);
         setTemplateId(tpl?.id ?? "");
         savedChoice.current = `${settings.lastDesignSystemId ?? ""}|${settings.lastTemplateId ?? ""}`;
+      } else {
+        // Nothing chosen yet: the first import (setup wizard) is what gets remembered.
+        savedChoice.current = "|";
       }
     });
   }, []);
@@ -129,7 +136,10 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
   const versionProblem = template && ds ? templateVersionProblem(template, ds) : null;
   const builtinForDs = ds ? templates.find((t) => t.id === BUILTIN_TEMPLATE_IDS[ds.framework]) : undefined;
   const frameworksWithDs = new Set((systems ?? []).map((s) => s.framework));
-  const ideas = Array.from({ length: IDEAS_SHOWN }, (_, i) => IDEAS[(ideaOffset + i) % IDEAS.length]);
+  const ranked = rankIdeas(IDEAS, (ds?.components ?? []).filter((c) => c.enabled).map((c) => c.name));
+  const ideas = Array.from({ length: IDEAS_SHOWN }, (_, i) => ranked[(ideaOffset + i) % ranked.length]);
+  // Before the first app, an idea builds straight away: no typing needed to see the result.
+  const firstRun = apps.length === 0;
   const recent = [...apps].sort((a, b) => b.updatedAt - a.updatedAt);
   const templateName = (app: AppRecord) =>
     templates.find((t) => t.id === (app.templateId ?? BUILTIN_TEMPLATE_IDS[app.framework]))?.name ?? "Template removed";
@@ -144,7 +154,7 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
   const shown = matching.slice((currentPage - 1) * APPS_PER_PAGE, currentPage * APPS_PER_PAGE);
 
   if (systems === null) return <div className="page-scroll" />;
-  const needsSetup = !skipped && (systems.length === 0 || (settings !== null && !settings.ready));
+  const needsSetup = !skipped && wizard === true;
 
   return (
     <div className="page-scroll home">
@@ -162,6 +172,10 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
               settings={settings}
               onSettings={setSettings}
               onSkip={() => setSkipped(true)}
+              onFinish={() => {
+                setWizard(false);
+                setTimeout(() => focusRef.current?.(), 0);
+              }}
               onImported={() => {
                 void api.invoke("ds:list").then((list) => {
                   setSystems(list);
@@ -235,12 +249,21 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
                 </div>
               </Alert>
             )}
+            {busy && (
+              <div className="create-progress">
+                <Progress label="Creating your app" />
+                <p className="small">
+                  <b>Creating your app.</b> <span className="muted">Setting up files from {ds?.name ?? "your design system"} and saving a first version. Your prompt runs next.</span>
+                </p>
+              </div>
+            )}
             {error && (
               <Alert tone="danger" onDismiss={() => setError(null)}>
                 {error}
               </Alert>
             )}
             <div className="ideas">
+              {firstRun && <span className="muted small">Try one, it builds right away:</span>}
               {ideas.map((idea) => (
                 <button
                   key={idea.title}
@@ -248,6 +271,7 @@ export default function AppsPage({ apps, onAppsChanged, navigate }: { apps: AppR
                   disabled={busy}
                   onClick={() => {
                     setPrompt(idea.prompt);
+                    if (firstRun) return void create(idea.prompt);
                     focusRef.current?.();
                   }}
                 >

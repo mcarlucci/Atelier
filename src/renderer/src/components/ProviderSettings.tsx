@@ -11,7 +11,16 @@ const EFFORTS: EffortLevel[] = ["low", "medium", "high", "xhigh", "max"];
 const FILTER_AFTER = 12;
 
 /** Picks the active provider and configures it: endpoint, key, model. */
-export default function ProviderSettings({ settings, onSettings }: { settings: Settings; onSettings(s: Settings, note?: string): void }) {
+export default function ProviderSettings({
+  settings,
+  onSettings,
+  compact,
+}: {
+  settings: Settings;
+  onSettings(s: Settings, note?: string): void;
+  /** First-run setup: copy a key from the OS credential store without asking, and leave out the model-picker filter. */
+  compact?: boolean;
+}) {
   const configure = useCallback(
     (id: ProviderId, update: ProviderUpdate, note?: string) =>
       api
@@ -47,8 +56,8 @@ export default function ProviderSettings({ settings, onSettings }: { settings: S
           );
         })}
       </div>
-      <ProviderForm key={active.id} state={active} effort={settings.effort} configure={configure} onSettings={onSettings} />
-      <PromptModels settings={settings} configure={configure} />
+      <ProviderForm key={active.id} state={active} effort={settings.effort} configure={configure} onSettings={onSettings} autoImportKey={compact} />
+      {!compact && <PromptModels settings={settings} configure={configure} />}
     </>
   );
 }
@@ -58,11 +67,13 @@ function ProviderForm({
   effort,
   configure,
   onSettings,
+  autoImportKey,
 }: {
   state: ProviderState;
   effort: EffortLevel;
   configure(id: ProviderId, update: ProviderUpdate, note?: string): Promise<void>;
   onSettings(s: Settings, note?: string): void;
+  autoImportKey?: boolean;
 }) {
   const preset = providerPreset(state.id);
   const [baseUrl, setBaseUrl] = useState(state.baseUrl);
@@ -105,7 +116,12 @@ function ProviderForm({
     let live = true;
     api
       .invoke("settings:detect-keychain-key")
-      .then((r) => live && setStored(r.found ? (r.source ?? "the OS credential store") : null))
+      .then((r) => {
+        if (!live) return;
+        setStored(r.found ? (r.source ?? "the OS credential store") : null);
+        // First run: a key the user already has is applied without a click.
+        if (r.found && autoImportKey) void importStored();
+      })
       .catch(() => {});
     return () => {
       live = false;
