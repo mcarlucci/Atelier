@@ -179,8 +179,9 @@
     </div>
   </footer>
   <script>
-    // Points the Download buttons at the installer for the visitor's OS. Without a match
-    // (phone, Linux on ARM, API down, release still uploading) they keep the releases page link.
+    // Points the Download buttons at the installer for the visitor's OS. When the latest release has no build
+    // for it (or is still uploading), they use the newest release that does and name its version. Without any
+    // match (phone, Linux on ARM, API down) they keep the releases page link.
     (async () => {
       const ua = navigator.userAgent;
       const os = /Windows/.test(ua) ? "win" : /Android|iPhone|iPad/.test(ua) ? null : /Mac/.test(ua) ? "mac" : /Linux|X11/.test(ua) ? "linux" : null;
@@ -191,14 +192,27 @@
         const h = await navigator.userAgentData?.getHighEntropyValues(["architecture"]);
         if (h?.architecture === "x86") arch = "x64";
       } catch {}
-      const release = await fetch("https://api.github.com/repos/mcarlucci/Atelier/releases/latest").then((r) => (r.ok ? r.json() : null)).catch(() => null);
-      const assets = release?.assets ?? [];
-      const find = (re) => assets.find((a) => re.test(a.name))?.browser_download_url;
+      // Newest first. Drafts are not listed to visitors, and prereleases are skipped.
+      const releases = (await fetch("https://api.github.com/repos/mcarlucci/Atelier/releases?per_page=30").then((r) => (r.ok ? r.json() : [])).catch(() => []))
+        .filter((r) => !r.draft && !r.prerelease);
+      const latest = releases[0]?.tag_name;
+      // The newest release with a matching installer; `tag` is set only when that is not the latest release.
+      const find = (re) => {
+        for (const r of releases) {
+          const url = r.assets.find((a) => re.test(a.name))?.browser_download_url;
+          if (url) return { url, tag: r.tag_name === latest ? "" : r.tag_name };
+        }
+        return {};
+      };
+      const build = (label, re) => {
+        const { url, tag } = find(re);
+        return { label: tag ? `${label}, ${tag}` : label, url };
+      };
       const builds = {
-        mac: { label: "macOS", url: find(new RegExp(`mac-${arch}\\.dmg$`)) },
-        macOther: { label: arch === "arm64" ? "macOS (Intel)" : "macOS (Apple silicon)", url: find(new RegExp(`mac-${arch === "arm64" ? "x64" : "arm64"}\\.dmg$`)) },
-        win: { label: "Windows", url: find(/win-x64\.exe$/) },
-        linux: { label: "Linux", url: find(/linux-x86_64\.AppImage$/) },
+        mac: build("macOS", new RegExp(`mac-${arch}\\.dmg$`)),
+        macOther: build(arch === "arm64" ? "macOS (Intel)" : "macOS (Apple silicon)", new RegExp(`mac-${arch === "arm64" ? "x64" : "arm64"}\\.dmg$`)),
+        win: build("Windows", /win-x64\.exe$/),
+        linux: build("Linux", /linux-x86_64\.AppImage$/),
       };
       const mine = builds[os];
       if (!mine?.url) return;
