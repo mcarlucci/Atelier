@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/mcarlucci/Atelier/compare/v0.8.2...v0.9.0) (2026-11-07)
+
+
+### Features
+
+* first-run momentum, a finished-build experience, and clean Invariant contracts for every one-click design system ([#32](https://github.com/mcarlucci/Atelier/issues/32)) ([6393b0a](https://github.com/mcarlucci/Atelier/commit/6393b0a95c14d31d3e806fc2c5c5536ffb8a2ba4))
+
 ## [0.8.2](https://github.com/mcarlucci/Atelier/compare/v0.8.1...v0.8.2) (2026-11-07)
 
 
