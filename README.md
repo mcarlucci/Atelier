@@ -67,7 +67,7 @@ Every change is saved as a version. Look back through the history and restore an
 
 ## How it works
 
-1. **Import your design system.** Point Atelier at your npm package, public or private, or at a local folder. It reads every component and its props, plus your styles, tokens and theme provider.
+1. **Import your design system.** On first launch a short setup walks you through it. Point Atelier at your npm package, public or private, or at a local folder, or click a popular library to try it. It reads every component and its props, plus your styles, tokens and theme provider.
 2. **Describe what you want.** Atelier builds a starter app that loads your design system, then writes the screens you ask for.
 3. **Refine.** Keep chatting, edit directly in the live preview, or open the code.
 4. **Hand off.** Each app is a plain git repository on your computer, ready for an engineer to pick up.
@@ -130,7 +130,7 @@ Atelier isn't code-signed yet, so your computer shows a warning the first time y
 
 ## Project status
 
-Atelier is in early development (0.x). React works end to end. Vue and Angular support importing, building and previewing. Expect rough edges, and please [open an issue](../../issues) when you find one.
+Atelier is in early development (0.x). React works end to end. Vue and Angular support importing, building, previewing and Invariant UI governance checks. Expect rough edges, and please [open an issue](../../issues) when you find one.
 
 ## Documentation
 
