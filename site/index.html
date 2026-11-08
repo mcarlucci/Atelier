@@ -18,6 +18,7 @@
       <img src="assets/atelier-wordmark-dark.svg" alt="Atelier">
       <div class="links">
         <a href="#why">Why</a>
+        <a href="#compliance">Compliance</a>
         <a href="#how">How</a>
         <a href="#trust">Trust</a>
         <a href="https://github.com/mcarlucci/Atelier">GitHub</a>
@@ -43,7 +44,7 @@
       <div class="pairs">
         <div class="pair">
           <div class="pain"><b>Before</b><p>AI builders ship generic UI. Engineers rebuild every screen.</p></div>
-          <div class="fix"><b>With Atelier</b><p>Every screen uses only your components. A built-in check flags anything off-system.</p></div>
+          <div class="fix"><b>With Atelier</b><p>Every screen uses only your components. Invariant UI compliance checks flag anything off-system.</p></div>
         </div>
         <div class="pair">
           <div class="pain"><b>Before</b><p>Mockups look right, but nothing works. Handoff is a guessing game.</p></div>
@@ -60,6 +61,22 @@
       </div>
     </section>
 
+    <section id="compliance">
+      <span class="badge">Powered by Invariant UI</span>
+      <h2>Compliant by contract, not by prompt.</h2>
+      <p class="lede">Atelier compiles your design system into an <a href="https://invariantui.com">Invariant UI</a> contract: every component, prop, token and approved pattern. The AI builds against it, and every change is checked against it.</p>
+      <div class="frame">
+        <img src="assets/compliance.gif" alt="Atelier's Checks tab validating generated code against the Invariant UI contract: five violations are listed with the allowed values, and after the fix the check shows no violations" loading="lazy" width="1040">
+      </div>
+      <div class="trust">
+        <div><h3>The AI reads the rules</h3><p>Components, tokens and approved UX patterns are served to the model while it builds.</p></div>
+        <div><h3>Every build is checked</h3><p>Generated code is validated against the contract: unknown components, props and values that are not allowed. Findings show in the chat and on the Checks tab, with the allowed values.</p></div>
+        <div><h3>Checked in the browser too</h3><p>After each build Atelier opens the app itself, so a blank page or a console error is caught and fixed before you look.</p></div>
+        <div><h3>Honest results</h3><p>Checks that can't be verified are reported as such, never counted as passes.</p></div>
+        <div><h3>Local and deterministic</h3><p>No account, no cloud. The same sources always give the same contract.</p></div>
+      </div>
+    </section>
+
     <section id="importer">
       <h2>Other tools can't read your design system. Atelier can.</h2>
       <p class="lede">Most AI builders never see your components. They guess from screenshots, ask you to paste docs, or make you rebuild everything in their own kit. The result looks close and ships wrong.</p>
@@ -68,6 +85,9 @@
           <div class="pain"><b>Other tools</b><p>Hand-written prompts. Pasted docs. Components rebuilt in a proprietary kit.</p></div>
           <div class="fix"><b>Atelier</b><p>Point at your npm package or local folder. The importer reads it for you.</p></div>
         </div>
+      </div>
+      <div class="frame importer-demo">
+        <img src="assets/setup.gif" alt="Importing Radix Themes in one click: Atelier downloads the package, reads its components and builds the Invariant UI contract, then asks for an AI model" loading="lazy" width="800">
       </div>
       <div class="trust importer">
         <div><h3>Reads your real types</h3><p>Parses your TypeScript declarations. Gets every component, prop, event, required flag and compound part (<code>Dialog.Root</code>). React, Vue and Angular.</p></div>
@@ -129,17 +149,6 @@
           <h3>Connectors</h3>
           <div class="chips"><span>Figma</span><span>Storybook</span><span>Any MCP server</span></div>
         </div>
-      </div>
-    </section>
-
-    <section id="compliance">
-      <h2>Compliant by contract, not by prompt.</h2>
-      <p class="lede">Atelier bundles <a href="https://invariantui.com">Invariant UI</a>, so a prototype follows your design system's rules and approved patterns.</p>
-      <div class="trust">
-        <div><h3>The AI reads the rules</h3><p>Components, tokens and approved UX patterns are served to the model while it builds.</p></div>
-        <div><h3>Every turn is checked</h3><p>Generated code is validated against the contract. Findings show in the chat and the Compliance tab.</p></div>
-        <div><h3>Honest results</h3><p>Checks that can't be verified are reported as such, never counted as passes.</p></div>
-        <div><h3>Local and deterministic</h3><p>No account, no cloud. The same sources always give the same contract.</p></div>
       </div>
     </section>
 

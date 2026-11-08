@@ -95,9 +95,11 @@ Supported providers: Anthropic (Claude), Ollama, LM Studio, OpenRouter, Groq, Go
 
 Connectors let the AI look things up while it builds: a design in Figma, a component's documentation in Storybook, or any tool that speaks the Model Context Protocol (MCP). With the Figma connector set up, paste a Figma link into the chat and Atelier builds that design from your components. See [Connectors](docs/connectors.md).
 
-## Keep the AI on-system
+## Compliance, powered by Invariant UI
 
 Atelier bundles [Invariant UI](https://invariantui.com), which turns a design system into a contract of components, tokens and approved UX patterns. The AI reads the contract while it builds, each turn's code is checked against it, and the workspace's Compliance tab shows the results. See [Compliance](docs/compliance.md).
+
+<img src="docs/images/compliance.gif" alt="The Checks tab validating generated code against the Invariant UI contract: five violations with the allowed values, then no violations after the fix">
 
 ## Built for company use
 
