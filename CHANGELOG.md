@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/mcarlucci/Atelier/compare/v0.9.2...v0.10.0) (2026-11-08)
+
+
+### Features
+
+* let the chat see, check and use the preview ([#38](https://github.com/mcarlucci/Atelier/issues/38)) ([db386d0](https://github.com/mcarlucci/Atelier/commit/db386d008917b1b1623735a4583318e1d3444f0f))
+
 ## [0.9.2](https://github.com/mcarlucci/Atelier/compare/v0.9.1...v0.9.2) (2026-11-08)
 
 
