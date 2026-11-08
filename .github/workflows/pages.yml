@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir -p site/assets
           cp assets/atelier/svg/*.svg site/assets/
-          cp docs/images/build.gif docs/images/select-and-edit.gif docs/images/ask-ai.gif docs/images/compliance.gif docs/images/setup.gif site/assets/
+          cp docs/images/build.gif docs/images/build-dark.gif docs/images/select-and-edit.gif docs/images/ask-ai.gif docs/images/compliance.gif docs/images/setup.gif site/assets/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
