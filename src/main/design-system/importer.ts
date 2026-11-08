@@ -11,7 +11,7 @@ import type {
 import { NPM, run, runOrThrow } from "../process";
 import { runtimeCommand, runtimeEnv, type NodeRuntime } from "../node/runtimes";
 import { extractComponents, type EntryPoint, type ExtractResult } from "./extract";
-import { setupPreset } from "./presets";
+import { emotionPeers, setupPreset } from "./presets";
 
 export const MANIFEST_FILE = "atelier.manifest.json";
 const MAX_SUBPATH_ENTRIES = 150;
@@ -128,7 +128,7 @@ export async function importDesignSystem(opts: ImportOptions): Promise<DesignSys
     globalCss,
     provider,
     // Merged, so a re-import adds packages a newer preset needs.
-    extraDependencies: { ...preset?.setup.extraDependencies, ...override.setup?.extraDependencies },
+    extraDependencies: { ...emotionPeers(pkg.peerDependencies), ...preset?.setup.extraDependencies, ...override.setup?.extraDependencies },
     angularModules: override.setup?.angularModules,
     angularProviders: override.setup?.angularProviders ?? preset?.setup.angularProviders,
     vuePlugin: framework === "vue" ? (override.setup?.vuePlugin ?? preset?.setup.vuePlugin) : undefined,

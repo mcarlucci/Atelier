@@ -112,3 +112,15 @@ describe("noComponentsMessage", () => {
     expect(noComponentsMessage(pkg, ["react"], [{ file: "/x", importPath: "acme" }], true)).toContain('"Detect automatically"');
   });
 });
+
+import { emotionPeers } from "../src/main/design-system/presets";
+
+describe("emotionPeers", () => {
+  it("keeps the emotion styling engine and nothing else, so MUI renders", () => {
+    expect(emotionPeers({ "@emotion/react": "^11.5.0", "@emotion/styled": "^11.3.0", "@mui/material-pigment-css": "^9.5.0", react: "^19" })).toEqual({
+      "@emotion/react": "^11.5.0",
+      "@emotion/styled": "^11.3.0",
+    });
+    expect(emotionPeers(undefined)).toEqual({});
+  });
+});

@@ -622,7 +622,8 @@ export class Services {
     const checkable = files.filter((f) => [...extensions, ".vue", ".html"].includes(path.extname(f)));
     if (checkable.length === 0 || !this.invariantComponents(appDir)) return [];
     const result = await this.invariant.validate(appDir, checkable);
-    return result.violations.map((v) => ({
+    // "Could not verify" findings are information, not something for the user or the AI to fix.
+    return result.violations.filter((v) => v.severity !== "info").map((v) => ({
       file: v.file,
       line: v.line ?? 1,
       rule: v.code,
