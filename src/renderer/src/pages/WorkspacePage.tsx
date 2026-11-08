@@ -265,7 +265,7 @@ export default function WorkspacePage({ appId, initialPrompt, navigate }: { appI
             </button>
           </Tooltip>
         </Toolbar>
-        <Tabs label="Workspace views" value={tab} onValue={setTab} tabs={tabs(autoCheck ? autoCheck.violations.length : null)} className="workspace-tabs">
+        <Tabs label="Workspace views" value={tab} onValue={setTab} tabs={tabs(autoCheck ? autoCheck.violations.filter((v) => v.severity !== "info").length : null)} className="workspace-tabs">
           <TabPanel name="preview" className="tab-body">
             <PreviewView
               appId={appId}

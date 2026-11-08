@@ -65,6 +65,9 @@ export default function ChecksPanel({
     </button>
   );
   const result = manual ?? autoResult;
+  // "Could not verify" findings are information, not violations to fix.
+  const issues = result?.violations.filter((v) => v.severity !== "info") ?? [];
+  const unverified = (result?.violations.length ?? 0) - issues.length;
   const pr = result?.summary.patternRules;
   return (
     <div className="page-scroll compliance">
@@ -103,7 +106,7 @@ export default function ChecksPanel({
               {pr && ` · pattern rules: ${pr.pass} pass, ${pr.fail} fail, ${pr.warning} warning, ${pr.notVerifiable} not verifiable, ${pr.skipped} skipped`}
             </p>
             <ul className="compliance-list">
-              {result.violations.map((v, i) => (
+              {issues.map((v, i) => (
                 <li key={i}>
                   <span className={`meta-pill${v.severity === "error" ? " bad" : ""}`}>{v.severity}</span>{" "}
                   <code>
@@ -113,13 +116,14 @@ export default function ChecksPanel({
                   {v.suggestion && <div className="muted small">Fix: {v.suggestion}</div>}
                 </li>
               ))}
-              {result.violations.length === 0 && <li className="muted">No violations.</li>}
+              {issues.length === 0 && <li className="muted">No violations.</li>}
             </ul>
-            {onFix && result.violations.length > 0 && (
+            {unverified > 0 && <p className="muted small">{unverified} {unverified === 1 ? "prop" : "props"} could not be verified because the library's prop list is incomplete.</p>}
+            {onFix && issues.length > 0 && (
               <button
                 className="sm primary"
                 onClick={() =>
-                  onFix(`Fix these compliance violations:\n${result.violations.map((v) => `- ${v.file}:${v.line ?? 1} ${v.message}${v.suggestion ? ` (${v.suggestion})` : ""}`).join("\n")}`)
+                  onFix(`Fix these compliance violations:\n${issues.map((v) => `- ${v.file}:${v.line ?? 1} ${v.message}${v.suggestion ? ` (${v.suggestion})` : ""}`).join("\n")}`)
                 }
               >
                 Fix with AI
