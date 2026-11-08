@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import ts from "typescript";
 import type { ComponentInfo, FrameworkId, PropInfo } from "@shared/types";
 
@@ -21,21 +23,35 @@ const MAX_TYPE_LENGTH = 160;
  * declarations. Declarations are the one artifact every React, Vue and
  * Angular library ships, so no framework runtime or build step is needed.
  */
+/**
+ * Where TypeScript's `lib.*.d.ts` files are. A packaged app keeps them in `resources/typescript-lib`, because the
+ * installer leaves every `.d.ts` out of `node_modules`. Without them `Array`, `Record`, `Omit` and the rest are
+ * unknown and most components are silently not recognised, so a missing folder is an error, not a smaller catalog.
+ */
+function typescriptLibDir(): string {
+  const packaged = process.resourcesPath ? path.join(process.resourcesPath, "typescript-lib") : undefined;
+  const dir = packaged && fs.existsSync(packaged) ? packaged : path.dirname(ts.getDefaultLibFilePath({}));
+  if (!fs.existsSync(path.join(dir, "lib.d.ts"))) throw new Error(`TypeScript's library files are missing from this install (${dir}), so components cannot be read.`);
+  return dir;
+}
+
 export function extractComponents(entries: EntryPoint[], framework: FrameworkId): ExtractResult {
   const warnings: string[] = [];
-  const program = ts.createProgram(
-    entries.map((e) => e.file),
-    {
-      allowJs: false,
-      noEmit: true,
-      skipLibCheck: true,
-      jsx: ts.JsxEmit.ReactJSX,
-      module: ts.ModuleKind.ESNext,
-      moduleResolution: ts.ModuleResolutionKind.Bundler,
-      target: ts.ScriptTarget.ES2022,
-      types: [],
-    },
-  );
+  const options: ts.CompilerOptions = {
+    allowJs: false,
+    noEmit: true,
+    skipLibCheck: true,
+    jsx: ts.JsxEmit.ReactJSX,
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    target: ts.ScriptTarget.ES2022,
+    types: [],
+  };
+  const host = ts.createCompilerHost(options);
+  const libDir = typescriptLibDir();
+  host.getDefaultLibLocation = () => libDir;
+  host.getDefaultLibFileName = (o) => path.join(libDir, ts.getDefaultLibFileName(o));
+  const program = ts.createProgram({ rootNames: entries.map((e) => e.file), options, host });
   const checker = program.getTypeChecker();
   const byName = new Map<string, ComponentInfo>();
 

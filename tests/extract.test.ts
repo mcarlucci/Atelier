@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { extractComponents } from "../src/main/design-system/extract";
@@ -39,5 +41,19 @@ describe("extractComponents", () => {
     expect(components).toHaveLength(1);
     expect(components[0].props.map((p) => p.name)).toEqual(["label", "kind"]);
     expect(components[0].events).toEqual(["click", "update-value"]);
+  });
+});
+
+describe("TypeScript library files", () => {
+  it("refuses to read components when the packaged lib folder is missing its files", () => {
+    const res = fs.mkdtempSync(path.join(os.tmpdir(), "atelier-res-"));
+    fs.mkdirSync(path.join(res, "typescript-lib"));
+    const previous = (process as unknown as { resourcesPath?: string }).resourcesPath;
+    (process as unknown as { resourcesPath: string }).resourcesPath = res;
+    try {
+      expect(() => extractComponents([], "react")).toThrow(/library files are missing/);
+    } finally {
+      (process as unknown as { resourcesPath?: string }).resourcesPath = previous;
+    }
   });
 });
