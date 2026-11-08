@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import type { ConnectorView } from "@shared/connectors";
 import { PREVIEW_SELECT_MESSAGE } from "@shared/ipc";
 import type { InvariantValidateResult } from "@shared/invariant";
-import type { PreviewEdit, SelectedElement } from "@shared/types";
+import type { PreviewCheck, PreviewEdit, SelectedElement } from "@shared/types";
 import type { AppRecord, ChatRecord, DesignSystem, MessageRecord, RunnerStatus, VersionInfo } from "@shared/types";
 import { api, errorMessage } from "../api";
 import type { Route } from "../App";
@@ -34,6 +34,10 @@ const DEVICES = { desktop: "100%", tablet: "768px", mobile: "390px" } as const;
 type Device = keyof typeof DEVICES;
 /** Next steps offered after every build; each one is a prompt that works on any screen. */
 const FOLLOW_UPS = ["Add loading and empty states", "Make it work on a phone", "Add form validation and error messages"];
+/** Starts the prompt Atelier sends when its own check of the preview fails; the chat never sends it twice in a row. */
+const PREVIEW_FIX_PREFIX = "Atelier checked the preview";
+const previewFixPrompt = (check: PreviewCheck) =>
+  `${PREVIEW_FIX_PREFIX} after your last change and it ${check.blank ? "is blank" : "shows errors"}.${check.errors.length ? `\n\nErrors:\n${check.errors.map((e) => `- ${e}`).join("\n")}` : ""}\n\nUse the preview tools (screenshot, console, inspect) to find the cause, then fix it.`;
 const MAX_CONSOLE_CHARS = 200_000;
 const CHAT_WIDTH_KEY = "atelier.chatWidth";
 const MIN_CHAT = 340;
@@ -713,8 +717,14 @@ function ChatPanel({
       void api.invoke("chat:messages", chatId).then((list) => {
         setMessages(list);
         const last = list.at(-1);
+        // One automatic attempt per request: if the fix is also blank, the user decides.
+        if (last?.role === "assistant" && last.preview && !last.preview.ok && !list.at(-2)?.content.startsWith(PREVIEW_FIX_PREFIX)) {
+          toast("The preview has a problem. Fixing it…", "warning");
+          autoFix.current?.(last.preview);
+          return;
+        }
         if (last?.role !== "assistant" || !last.actions?.written.length) return;
-        toast("Your screen is ready", "success");
+        toast(last.preview && !last.preview.ok ? "The build has a problem" : "Your screen is ready", last.preview && !last.preview.ok ? "warning" : "success");
         onBuilt();
         composerFocus.current?.();
         // Milestones for the home page checklist; each keeps the date it was first reached.
@@ -765,6 +775,9 @@ function ChatPanel({
     onQueuedSent();
     void send(queued.text);
   });
+
+  const autoFix = useRef<(check: PreviewCheck) => void>(undefined);
+  autoFix.current = (check) => void send(previewFixPrompt(check));
 
   // Goes back to the version before the one this message made.
   const undo = async (hash: string) => {
@@ -823,6 +836,7 @@ function ChatPanel({
                 dsName={ds.name}
                 onFixCompliance={busy ? undefined : fixCompliance}
                 onOpenVersions={onOpenVersions}
+                onFixPreview={latest && m.preview && !m.preview.ok ? () => void send(previewFixPrompt(m.preview!)) : undefined}
                 onUndo={latest && m.actions?.commitHash ? () => void undo(m.actions!.commitHash!) : undefined}
               />
             );

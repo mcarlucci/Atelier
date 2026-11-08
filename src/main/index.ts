@@ -4,6 +4,7 @@ import { app, BrowserWindow, dialog, ipcMain, nativeTheme, net, safeStorage, she
 import { INVOKE_CHANNELS, type EventChannels, type InvokeChannel, type InvokeChannels } from "@shared/ipc";
 import { autoUpdater } from "electron-updater";
 import { useBundledGit } from "./git";
+import { openPreviewWindow } from "./preview/window";
 import { Services } from "./services";
 import type { UpdaterLike } from "./updater";
 import { selectorScript } from "./preview/selector";
@@ -233,6 +234,7 @@ app.whenReady().then(() => {
     userDataDir: app.getPath("userData"),
     emit,
     capturePreview,
+    openPreview: openPreviewWindow,
     fetch: (url) => net.fetch(url),
     // Packaging copies resources/node into the app's Resources folder (package.json "extraResources").
     bundledNodeDir: app.isPackaged ? path.join(process.resourcesPath, "node") : path.join(app.getAppPath(), "resources/node"),
