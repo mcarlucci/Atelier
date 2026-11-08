@@ -197,12 +197,46 @@ footer a { text-decoration: none; margin-left: 20px; }
 footer a:first-child { margin-left: 0; }
 footer a:hover { color: var(--text); }
 
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
 @media (max-width: 760px) {
-  .pair, .demos, .trust { grid-template-columns: 1fr; }
+  body { font-size: 16px; }
+  .wrap { padding: 0 18px; }
+  .pair, .demos, .trust { grid-template-columns: minmax(0, 1fr); }
+  .demos figure { min-width: 0; }
   .pair .pain { border-right: 0; border-bottom: 1px solid var(--line); }
+  .pair > div { padding: 20px; }
+  .trust div { padding: 18px 20px; }
   .steps { grid-template-columns: 1fr 1fr; }
-  nav .links { gap: 16px; }
-  .hero { padding-top: 40px; }
+
+  /* five links no longer fit beside the logo: let them wrap under it, with room to tap */
+  nav { flex-wrap: wrap; gap: 6px 16px; padding: 16px 0 8px; }
+  nav img { height: 30px; }
+  nav .links { flex-wrap: wrap; gap: 4px 18px; font-size: 14px; }
+  nav .links a { padding: 8px 0; }
+
+  .hero { padding: 28px 0 36px; }
+  .sub { font-size: 18px; margin-bottom: 28px; }
+  .cta { flex-direction: column; align-items: stretch; }
+  .btn { text-align: center; }
+  /* the demo GIFs are full app windows: at phone width their text is unreadable, so they scroll sideways at a legible size */
+  #compliance .frame, .demos .frame, .importer-demo { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #compliance .frame img, .demos .frame img { min-width: 720px; }
+  .importer-demo img { min-width: 560px; }
+  .frame { margin-top: 32px; border-radius: 10px; box-shadow: 0 16px 40px -16px rgba(82, 107, 255, .35); }
+
+  section { padding-top: 56px; }
+  .lede { margin-bottom: 28px; }
+  .demos { gap: 36px; }
+  .demos figcaption { font-size: 16px; }
+  .mcp { padding: 20px; }
+  .final { padding-bottom: 56px; }
+  footer .wrap { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .steps { grid-template-columns: 1fr; }
+  h1 { max-width: 100%; }
 }
 
 #compliance .badge { display: inline-block; margin-bottom: 14px; }
