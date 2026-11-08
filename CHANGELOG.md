@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/mcarlucci/Atelier/compare/v0.10.0...v0.10.1) (2026-11-08)
+
+
+### Bug Fixes
+
+* Radix checks work again and the Checks tab ignores unverifiable findings ([#41](https://github.com/mcarlucci/Atelier/issues/41)) ([a7cc9a5](https://github.com/mcarlucci/Atelier/commit/a7cc9a514c7c7778545f65dcda2659a2cf0c4a3d))
+
 ## [0.10.0](https://github.com/mcarlucci/Atelier/compare/v0.9.2...v0.10.0) (2026-11-08)
 
 
