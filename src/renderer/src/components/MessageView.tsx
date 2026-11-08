@@ -196,7 +196,10 @@ export default function MessageView({
   dsName,
   onOpenVersions,
   onUndo,
+  onFixPreview,
 }: {
+  /** Set on the latest message when its preview check failed and the chat is idle. */
+  onFixPreview?(): void;
   dsName?: string;
   onOpenVersions?(): void;
   /** Set only on the latest message of a finished turn. */
@@ -244,7 +247,7 @@ export default function MessageView({
           ))}
         </Alert>
       )}
-      {(actions?.commitHash || (message.compliance && message.compliance.length === 0 && actions && actions.written.length > 0)) && (
+      {(actions?.commitHash || message.preview?.ok || (message.compliance && message.compliance.length === 0 && actions && actions.written.length > 0)) && (
         <div className="msg-meta">
           {actions?.commitHash &&
             (onOpenVersions ? (
@@ -258,6 +261,12 @@ export default function MessageView({
                 Version {actions.commitHash.slice(0, 7)}
               </span>
             ))}
+          {message.preview?.ok && (
+            <span className="meta-pill ok">
+              <Icon name="eye" size={12} />
+              Preview checked
+            </span>
+          )}
           {onUndo && (
             <button className="meta-pill" onClick={onUndo} title="Go back to the version before this change">
               <Icon name="arrowLeft" size={12} />
@@ -271,6 +280,25 @@ export default function MessageView({
             </span>
           )}
         </div>
+      )}
+      {message.preview && !message.preview.ok && (
+        <Alert tone="warning">
+          <strong>{message.preview.blank ? "The preview is blank after this change." : `The preview shows ${message.preview.errors.length} error(s) after this change.`}</strong>
+          {message.preview.errors.length > 0 && (
+            <ul>
+              {message.preview.errors.map((e, i) => (
+                <li key={i}>
+                  <code>{e}</code>
+                </li>
+              ))}
+            </ul>
+          )}
+          {onFixPreview && (
+            <button className="sm" onClick={onFixPreview}>
+              Fix with AI
+            </button>
+          )}
+        </Alert>
       )}
       {message.compliance && message.compliance.length > 0 && (
         <Alert tone="warning">

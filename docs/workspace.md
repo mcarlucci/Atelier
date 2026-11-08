@@ -27,6 +27,16 @@ The **select** tool (pointer button in the preview bar) edits the page directly:
 
 The **Ask AI** button asks for a change to the selected element. The request is sent with the element's route, text, HTML, key computed styles, owning components and, for React and Vue, its source file.
 
+## The chat can see the preview
+
+While the app is running, the AI can look at it and use it, in a private copy of the page that never touches the preview you see or the app's files:
+
+- **Screenshot** at any width (for example a phone), **inspect** (headings, buttons, links and fields with their names and values, missing labels and alt text, visible text) and **console** (errors, warnings and build errors).
+- **Click** and **type** to walk through a form or a dialog.
+- **Browser checks:** the Invariant UI checks for layout at phone, tablet and desktop widths, language and alt text.
+
+The tools show the app as it was when the turn started, because the AI's edits are applied when it finishes. So after every build Atelier opens the app fresh itself. If the page is blank or throws errors, the message says so and Atelier asks the AI to fix it once, using the tools; if the fix also fails, a **Fix with AI** button lets you decide. A message whose preview was checked and is fine shows a "Preview checked" pill.
+
 ## Versions, code and console
 
 - **Versions** lists every commit and can restore any of them.

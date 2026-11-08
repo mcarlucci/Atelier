@@ -198,6 +198,13 @@ export type PreviewEdit =
 /** Saving preview edits either commits them directly or hands a prompt to the chat. */
 export type PreviewSaveResult = { committed: true } | { committed: false; prompt: string };
 
+/** What the preview looked like right after a build: blank, throwing errors, or fine. */
+export interface PreviewCheck {
+  ok: boolean;
+  blank: boolean;
+  errors: string[];
+}
+
 export interface MessageRecord {
   id: string;
   chatId: string;
@@ -206,6 +213,8 @@ export interface MessageRecord {
   createdAt: number;
   actions?: ActionSummary;
   compliance?: ComplianceIssue[];
+  /** Assistant messages: the preview checked after the build, when the app was running. */
+  preview?: PreviewCheck;
   error?: string;
   /** Problems that didn't stop the turn, such as a connector that failed to connect. */
   warnings?: string[];

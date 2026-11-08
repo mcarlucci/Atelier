@@ -25,6 +25,9 @@ import { DEFAULT_MODEL } from "./chat/llm";
 import { describeProviderError, listModels, streamTurn, type ChatTurn, type ProviderTarget } from "./chat/providers";
 import { BASE_PROMPT, connectorsPrompt, invariantPrompt } from "./chat/prompt";
 import { mergeToolsets, openInvariantToolset, type InvariantToolset } from "./invariant/mcp";
+import { checkPreviewPage } from "./preview/check";
+import type { OpenPreview } from "./preview/page";
+import { createPreviewToolset, PREVIEW_PROMPT } from "./preview/tools";
 import { importDesignSystem, npmEnv, npmrcFor } from "./design-system/importer";
 import { buildDesignSystemRules } from "./design-system/rules";
 import { writeFile } from "./templates";
@@ -38,7 +41,7 @@ import { ConnectorService } from "./connectors/service";
 import { UpdateService, type UpdaterLike } from "./updater";
 import { InvariantRunner, OUTPUT_DIR } from "./invariant/runner";
 import type { InvariantBrowserReport, InvariantStatus, InvariantValidateResult } from "@shared/invariant";
-import type { ComplianceIssue } from "@shared/types";
+import type { ComplianceIssue, PreviewCheck } from "@shared/types";
 import { sanitizeSelection, selectionPrompt } from "./preview/selection";
 import { editsPrompt, planTextEdits, sanitizeEdits, writePlannedEdits } from "./preview/edits";
 import { newId, Store } from "./store";
@@ -66,6 +69,8 @@ export interface ServiceDeps {
   nodeMirror?: string;
   /** Screenshots a running dev server as a JPEG. Absent in tests. */
   capturePreview?(url: string): Promise<Buffer | null>;
+  /** Opens a private copy of a running dev server for the chat to look at and use. Absent in tests. */
+  openPreview?: OpenPreview;
   /** The auto-updater. Absent in dev builds and tests, which turns updates off. */
   updater?: UpdaterLike;
   appVersion?: string;
@@ -634,6 +639,26 @@ export class Services {
     }));
   }
 
+  /** Opens the app fresh and reports whether it is blank or throws errors. Undefined when it cannot be looked at. */
+  private async checkPreview(appId: string, restarting: boolean): Promise<PreviewCheck | undefined> {
+    const open = this.deps.openPreview;
+    if (!open) return undefined;
+    // A restart or install takes the dev server down for a while.
+    const deadline = Date.now() + (restarting ? 60_000 : 8_000);
+    while (this.runner.status(appId).state !== "running" && Date.now() < deadline) await new Promise((r) => setTimeout(r, 500));
+    const status = this.runner.status(appId);
+    if (status.state !== "running" || !status.url) return undefined;
+    let page: Awaited<ReturnType<OpenPreview>> | undefined;
+    try {
+      page = await open(status.url);
+      return await checkPreviewPage(page);
+    } catch {
+      return undefined;
+    } finally {
+      page?.close();
+    }
+  }
+
   private async capturePreview(appId: string): Promise<void> {
     const status = this.runner.status(appId);
     if (status.state !== "running" || !this.deps.capturePreview) return;
@@ -804,6 +829,7 @@ export class Services {
     const controller = new AbortController();
     this.inflight.set(chat.id, controller);
     let invariantTools: InvariantToolset | undefined;
+    let previewTools: ReturnType<typeof createPreviewToolset> | undefined;
     try {
       const snapshot = await snapshotCodebase(app.path);
       const notes = readAppNotes(app.path);
@@ -817,7 +843,17 @@ export class Services {
           assistant.warnings = [...(assistant.warnings ?? []), `Invariant UI tools unavailable: ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`];
         }
       }
-      const system = `${BASE_PROMPT}\n\n${buildDesignSystemRules(ds, template)}${connectors.toolset ? `\n\n${connectorsPrompt(connectors.connectors)}` : ""}${invariantTools ? `\n\n${invariantPrompt()}` : ""}`;
+      // The chat can look at the preview only while the app is running.
+      const running = this.runner.status(app.id);
+      if (this.deps.openPreview && running.state === "running" && running.url) {
+        const open = this.deps.openPreview;
+        const url = running.url;
+        previewTools = createPreviewToolset(
+          () => open(url),
+          async () => formatBrowserReport(await this.invariantBrowserRun(app.id)),
+        );
+      }
+      const system = `${BASE_PROMPT}\n\n${buildDesignSystemRules(ds, template)}${connectors.toolset ? `\n\n${connectorsPrompt(connectors.connectors)}` : ""}${invariantTools ? `\n\n${invariantPrompt()}` : ""}${previewTools ? `\n\n${PREVIEW_PROMPT}` : ""}`;
       const messages: ChatTurn[] = [
         ...history.map((m) => ({
           role: m.role,
@@ -837,7 +873,7 @@ export class Services {
       const result = await streamTurn(target, {
         system,
         messages,
-        toolset: mergeToolsets(connectors.toolset, invariantTools?.toolset),
+        toolset: mergeToolsets(connectors.toolset, invariantTools?.toolset, previewTools?.toolset),
         signal: controller.signal,
         onText: (text) => {
           assistant.content += text;
@@ -891,6 +927,8 @@ export class Services {
         }
         this.touch(app.id);
         this.schedulePreview(app.id);
+        // Look at the result the way a visitor would: a blank page or errors are caught here, not by the user.
+        if (applied.written.length || applied.renamed.length) assistant.preview = await this.checkPreview(app.id, applied.dependencies.length > 0 || applied.commands.includes("restart") || applied.commands.includes("rebuild"));
       }
     } catch (err) {
       if (err instanceof Anthropic.APIUserAbortError || controller.signal.aborted) {
@@ -900,12 +938,19 @@ export class Services {
       }
     } finally {
       this.inflight.delete(chat.id);
+      previewTools?.close();
       await invariantTools?.close();
     }
     this.store.update((d) => d.messages.push(assistant));
     this.deps.emit("chat:done", { chatId: chat.id, message: assistant });
     return assistant;
   }
+}
+
+/** The Invariant browser checks as text a model can act on. */
+function formatBrowserReport(report: InvariantBrowserReport): string {
+  const lines = report.results.map((r) => `${r.status.toUpperCase()} ${r.scenario} · ${r.check}${r.reason ? `: ${r.reason}` : ""}${r.suggestion ? ` (${r.suggestion})` : ""}`);
+  return [`Browser checks: ${report.summary.pass} passed, ${report.summary.fail} failed, ${report.summary.error} could not run.`, ...lines, ...report.notes].join("\n");
 }
 
 /** User/assistant pairs whose reply succeeded, so roles keep alternating. */
