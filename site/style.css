@@ -204,3 +204,7 @@ footer a:hover { color: var(--text); }
   nav .links { gap: 16px; }
   .hero { padding-top: 40px; }
 }
+
+#compliance .badge { display: inline-block; margin-bottom: 14px; }
+#compliance .frame { margin: 0 0 28px; }
+.importer-demo { margin: 0 auto 28px; max-width: 800px; }
