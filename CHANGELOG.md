@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/mcarlucci/Atelier/compare/v0.9.1...v0.9.2) (2026-11-08)
+
+
+### Bug Fixes
+
+* ship TypeScript's library files so installed apps read every component ([#36](https://github.com/mcarlucci/Atelier/issues/36)) ([b43e736](https://github.com/mcarlucci/Atelier/commit/b43e736f8acaf2641f530219b85e4d0fc083767c))
+
 ## [0.9.1](https://github.com/mcarlucci/Atelier/compare/v0.9.0...v0.9.1) (2026-11-08)
 
 
