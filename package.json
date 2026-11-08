@@ -46,6 +46,13 @@
         "to": "invariant"
       },
       {
+        "from": "node_modules/typescript/lib",
+        "to": "typescript-lib",
+        "filter": [
+          "lib*.d.ts"
+        ]
+      },
+      {
         "from": "THIRD_PARTY_NOTICES.md",
         "to": "THIRD_PARTY_NOTICES.md"
       },
