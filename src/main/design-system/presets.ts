@@ -15,6 +15,15 @@ export interface SetupPreset {
   >;
 }
 
+/**
+ * MUI and other emotion-based libraries list `@emotion/react` and `@emotion/styled` as optional peers (a library can
+ * use another styling engine), so npm leaves them out, and the app builds but renders a blank page. Atelier uses the
+ * emotion engine, so the app installs them.
+ */
+export function emotionPeers(peers: Record<string, string> | undefined): Record<string, string> {
+  return Object.fromEntries(Object.entries(peers ?? {}).filter(([name]) => name === "@emotion/react" || name === "@emotion/styled"));
+}
+
 export function setupPreset(framework: FrameworkId, packageName: string, version: string): SetupPreset | null {
   if (framework === "angular") return angularPreset(packageName, version);
   if (framework === "vue") return vuePreset(packageName, version);
