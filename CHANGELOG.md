@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/mcarlucci/Atelier/compare/v0.9.0...v0.9.1) (2026-11-08)
+
+
+### Bug Fixes
+
+* install MUI's emotion peers so the preview renders, and stop false compliance errors ([#34](https://github.com/mcarlucci/Atelier/issues/34)) ([0322404](https://github.com/mcarlucci/Atelier/commit/0322404e0c5cc42cfd55ebb2d260daaf7eefe17c))
+
 ## [0.9.0](https://github.com/mcarlucci/Atelier/compare/v0.8.2...v0.9.0) (2026-11-07)
 
 
