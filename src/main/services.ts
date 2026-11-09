@@ -22,6 +22,7 @@ import { applyFileActions, elideFileBodies, parseResponse, safeJoin } from "./ch
 import { checkCompliance } from "./chat/compliance";
 import { readAppNotes, snapshotCodebase } from "./chat/context";
 import { DEFAULT_MODEL } from "./chat/llm";
+import { detectFederatedAuth } from "./anthropic-auth";
 import { describeProviderError, listModels, streamTurn, type ChatTurn, type ProviderTarget } from "./chat/providers";
 import { BASE_PROMPT, connectorsPrompt, invariantPrompt } from "./chat/prompt";
 import { mergeToolsets, openInvariantToolset, type InvariantToolset } from "./invariant/mcp";
@@ -229,7 +230,9 @@ export class Services {
     const preset = providerPreset(id);
     if (id === "anthropic") {
       const shownModels = s.providerConfigs?.anthropic?.shownModels;
-      return { id, baseUrl: "", hasApiKey: Boolean(s.encryptedApiKey || process.env.ANTHROPIC_API_KEY), model: s.model, ...(shownModels ? { shownModels } : {}) };
+      const ownKey = Boolean(s.encryptedApiKey || process.env.ANTHROPIC_API_KEY);
+      const authSource = ownKey ? undefined : detectFederatedAuth()?.source;
+      return { id, baseUrl: "", hasApiKey: ownKey || Boolean(authSource), ...(authSource ? { authSource } : {}), model: s.model, ...(shownModels ? { shownModels } : {}) };
     }
     const c = s.providerConfigs?.[id] ?? {};
     return {
@@ -249,7 +252,8 @@ export class Services {
     const ps = this.providerSettings(id);
     const enc = id === "anthropic" ? s.encryptedApiKey : s.providerConfigs?.[id]?.encryptedApiKey;
     const apiKey = enc ? await this.deps.secrets.decrypt(enc) : id === "anthropic" ? process.env.ANTHROPIC_API_KEY : undefined;
-    if (preset.needsKey && !apiKey) throw new Error(`Add a ${preset.label} API key in Settings first.`);
+    // With no key, the Anthropic SDK resolves organization-managed credentials itself.
+    if (preset.needsKey && !apiKey && !ps.authSource) throw new Error(`Add a ${preset.label} API key in Settings first.`);
     return { preset, baseUrl: ps.baseUrl, apiKey, model: ps.model, effort: s.effort, contextLength: ps.contextLength };
   }
 

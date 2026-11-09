@@ -11,7 +11,7 @@ export const MODELS = [
 export const DEFAULT_MODEL = "claude-opus-5-5";
 
 export interface StreamRequest {
-  apiKey: string;
+  apiKey?: string;
   model: string;
   effort: EffortLevel;
   /** Stable, cacheable prefix: base prompt and design system rules. */
@@ -37,7 +37,7 @@ export interface StreamResult {
  * the requested tools, send the results, and continue until the model answers.
  */
 export async function streamBuildTurn(req: StreamRequest): Promise<StreamResult> {
-  const client = new Anthropic({ apiKey: req.apiKey });
+  const client = new Anthropic(req.apiKey ? { apiKey: req.apiKey } : {});
   // Server-side refusal fallback is available for Opus and Sonnet, not Haiku.
   const fallback = req.model.startsWith("claude-haiku") ? {} : { fallbacks: "default" as const };
   // Tool inputs here are small (links, ids), so eager input streaming stays

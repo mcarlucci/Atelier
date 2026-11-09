@@ -46,7 +46,7 @@ export async function streamTurn(target: ProviderTarget, req: TurnRequest): Prom
   if (!target.model) throw new Error(`Choose a ${target.preset.label} model in Settings first.`);
   switch (target.preset.kind) {
     case "anthropic":
-      return streamBuildTurn({ apiKey: target.apiKey ?? "", model: target.model, effort: target.effort, ...req });
+      return streamBuildTurn({ apiKey: target.apiKey, model: target.model, effort: target.effort, ...req });
     case "ollama":
       return streamOllama(target, req);
     default:

@@ -235,6 +235,8 @@ export interface ProviderSettings {
   baseUrl: string;
   /** A key is stored (or, for Anthropic, set in the environment). Keys never reach the renderer. */
   hasApiKey: boolean;
+  /** Anthropic only: no key is saved, but credentials managed by the user's organization were found (e.g. "profile default"). Counts as usable. */
+  authSource?: string;
   /** Last model chosen for this provider. */
   model: string;
   /** Ollama only: context window requested per turn, in tokens. */
