@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/mcarlucci/Atelier/compare/v0.11.0...v0.12.0) (2026-11-09)
+
+
+### Features
+
+* **provider:** update supported providers and enhance provider settings ([#47](https://github.com/mcarlucci/Atelier/issues/47)) ([98bd927](https://github.com/mcarlucci/Atelier/commit/98bd927e126e021479ffc3d6bd0bc393289f26e8))
+
 ## [0.11.0](https://github.com/mcarlucci/Atelier/compare/v0.10.1...v0.11.0) (2026-11-09)
 
 
