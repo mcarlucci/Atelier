@@ -18,6 +18,8 @@ export interface PersistedSettings {
   progress?: Progress;
   /** Anthropic API key encrypted with Electron safeStorage, base64. */
   encryptedApiKey?: string;
+  /** Providers whose auto-detected values (environment key, organization credentials, local server) the user chose not to use. */
+  ignoredDetected?: ProviderId[];
   /** Other providers. Keys are encrypted like the Anthropic one. */
   providerConfigs?: Partial<Record<ProviderId, { baseUrl?: string; model?: string; encryptedApiKey?: string; contextLength?: number; shownModels?: string[] }>>;
 }

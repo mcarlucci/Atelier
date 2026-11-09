@@ -18,7 +18,7 @@ export default function ProviderSettings({
 }: {
   settings: Settings;
   onSettings(s: Settings, note?: string): void;
-  /** First-run setup: copy a key from the OS credential store without asking, and leave out the model-picker filter. */
+  /** First-run setup: leave out the model-picker filter. */
   compact?: boolean;
 }) {
   const configure = useCallback(
@@ -64,7 +64,7 @@ export default function ProviderSettings({
           );
         })}
       </div>
-      <ProviderForm key={shown.id} state={shown} effort={settings.effort} configure={configure} onSettings={onSettings} autoImportKey={compact} />
+      <ProviderForm key={shown.id} state={shown} effort={settings.effort} configure={configure} onSettings={onSettings} />
     </>
   );
 }
@@ -74,13 +74,11 @@ function ProviderForm({
   effort,
   configure,
   onSettings,
-  autoImportKey,
 }: {
   state: ProviderState;
   effort: EffortLevel;
   configure(id: ProviderId, update: ProviderUpdate, note?: string): Promise<void>;
   onSettings(s: Settings, note?: string): void;
-  autoImportKey?: boolean;
 }) {
   const preset = providerPreset(state.id);
   const [baseUrl, setBaseUrl] = useState(state.baseUrl);
@@ -126,8 +124,6 @@ function ProviderForm({
       .then((r) => {
         if (!live) return;
         setStored(r.found ? (r.source ?? "the OS credential store") : null);
-        // First run: a key the user already has is applied without a click.
-        if (r.found && autoImportKey) void importStored();
       })
       .catch(() => {});
     return () => {
@@ -194,6 +190,37 @@ function ProviderForm({
           </button>
           {state.hasApiKey && !state.authSource && <button onClick={() => void configure(state.id, { apiKey: null }, "API key removed.")}>Remove</button>}
         </div>
+      )}
+
+      {state.detected && (
+        <Alert tone="info">
+          <div className="row">
+            <span className="grow">
+              {state.detected.ignored
+                ? `Ignoring ${state.detected.source}, found on this computer.`
+                : state.id === "anthropic" || state.hasApiKey
+                  ? `Using ${state.detected.source}, found on this computer.`
+                  : `Found a key in ${state.detected.source}.`}
+            </span>
+            {state.detected.ignored ? (
+              <button onClick={() => void configure(state.id, { useDetected: true }, "Detected value will be used.")}>Use it</button>
+            ) : state.id === "anthropic" ? (
+              <button onClick={() => void configure(state.id, { useDetected: false }, "Detected value ignored.")}>Ignore</button>
+            ) : state.hasApiKey ? null : (
+              <button
+                className="primary"
+                onClick={() =>
+                  api
+                    .invoke("settings:use-detected-provider", state.id)
+                    .then((s) => onSettings(s, `${preset.label} key set.`))
+                    .catch((e) => toast(errorMessage(e), "danger"))
+                }
+              >
+                Use it
+              </button>
+            )}
+          </div>
+        </Alert>
       )}
 
       {stored && !state.hasApiKey && (

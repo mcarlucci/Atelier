@@ -18,7 +18,7 @@ import type {
   UpdateState,
   VersionInfo,
 } from "./types";
-import type { ProviderId } from "./providers";
+import type { DetectedProvider, ProviderId } from "./providers";
 import type { InvariantBrowserReport, InvariantStatus, InvariantValidateResult } from "./invariant";
 import type { ConnectorInput, ConnectorView } from "./connectors";
 import type { TemplateInfo, TemplateSource, TemplateUpdate } from "./templates";
@@ -42,6 +42,10 @@ export interface InvokeChannels {
   "settings:detect-keychain-key": { args: []; result: { found: boolean; source?: string } };
   /** Copies that key into Atelier's own encrypted store. */
   "settings:import-keychain-key": { args: []; result: Settings };
+  /** Providers found via environment variables or a local server. Never returns a key. */
+  "settings:detect-providers": { args: []; result: DetectedProvider[] };
+  /** Adopts a detected provider: copies its env key, or picks a local server's first model. */
+  "settings:use-detected-provider": { args: [ProviderId]; result: Settings };
   /** Models the provider reports. Doubles as a connection test; `error` when the server can't be reached. */
   "llm:models": { args: [ProviderId]; result: { models: string[]; error?: string } };
 
@@ -168,6 +172,8 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   "settings:configure-provider",
   "settings:detect-keychain-key",
   "settings:import-keychain-key",
+  "settings:detect-providers",
+  "settings:use-detected-provider",
   "llm:models",
   "ds:list",
   "ds:get",
