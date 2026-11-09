@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Settings, UpdateState } from "@shared/types";
 import { api, errorMessage } from "../api";
-import ProviderSettings from "../components/ProviderSettings";
+import ProviderSettings, { PromptModels } from "../components/ProviderSettings";
 import { applyTheme, useThemePreference, type ThemePreference } from "../format";
 import { Icon } from "../ui/icons";
 import { TextField, ToggleGroup, toast } from "../ui/slab";
@@ -64,11 +64,13 @@ export default function SettingsPage({ onChange }: { onChange(s: Settings): void
 
       <section className="card form">
         <div>
-          <h2>AI model</h2>
-          <p className="muted small">Pick a provider. Local providers are free and keep everything on this computer.</p>
+          <h2>AI providers</h2>
+          <p className="muted small">Connect one or more providers. Select a tile to set it up; a green check means it is ready. Local providers are free and keep everything on this computer.</p>
         </div>
         <ProviderSettings settings={settings} onSettings={apply} />
       </section>
+
+      <PromptModels settings={settings} onSettings={apply} />
 
       <section className="card form">
         <h2>Apps folder</h2>

@@ -30,25 +30,33 @@ export default function ProviderSettings({
     [onSettings],
   );
 
-  const active = settings.providers.find((p) => p.id === settings.provider)!;
+  // The provider whose settings are shown below. Selecting a tile only opens it; a provider becomes the active one when you choose one of its models.
+  const [viewed, setViewed] = useState<ProviderId>(settings.provider);
+  const shown = settings.providers.find((p) => p.id === viewed)!;
 
   return (
     <>
       <div className="provider-grid" role="group" aria-label="Provider">
         {PROVIDERS.map((p) => {
           const state = settings.providers.find((x) => x.id === p.id)!;
-          const selected = p.id === settings.provider;
+          const selected = p.id === viewed;
+          // Ready to build with: a key (or org credentials) is saved, or a keyless provider has a model chosen.
+          const configured = p.needsKey ? state.hasApiKey : Boolean(state.model);
           return (
             <button
               key={p.id}
               className="provider-card"
               aria-pressed={selected}
-              onClick={() => !selected && void configure(p.id, { activate: true }, `Using ${p.label}.`)}
+              onClick={() => setViewed(p.id)}
             >
               <span className="provider-card-head">
                 <strong>{p.label}</strong>
                 {p.local ? <span className="tag ok">Local · free</span> : p.id === "anthropic" ? <span className="tag accent">Recommended</span> : null}
-                {selected && <Icon name="check" size={14} className="provider-check" />}
+                {configured && (
+                  <span className="provider-check" title="Configured" role="img" aria-label="Configured">
+                    <Icon name="check" size={14} />
+                  </span>
+                )}
               </span>
               <span className="muted small">{p.blurb}</span>
               {!p.local && p.needsKey && <span className={`small ${state.hasApiKey ? "ok" : "muted"}`}>{state.authSource ? "Using your organization's credentials" : state.hasApiKey ? "Key saved" : "Needs a key"}</span>}
@@ -56,8 +64,7 @@ export default function ProviderSettings({
           );
         })}
       </div>
-      <ProviderForm key={active.id} state={active} effort={settings.effort} configure={configure} onSettings={onSettings} autoImportKey={compact} />
-      {!compact && <PromptModels settings={settings} configure={configure} />}
+      <ProviderForm key={shown.id} state={shown} effort={settings.effort} configure={configure} onSettings={onSettings} autoImportKey={compact} />
     </>
   );
 }
@@ -213,7 +220,7 @@ function ProviderForm({
           placeholder={canQuery ? (loading ? "Loading models…" : "Choose a model") : "Save a key to list models"}
           value={state.model}
           options={options}
-          onValue={(model) => model !== state.model && void configure(state.id, { model }, `Model set to ${modelLabel(model)}.`)}
+          onValue={(model) => model !== state.model && void configure(state.id, { model, activate: true }, `Model set to ${modelLabel(model)}.`)}
         />
         <button onClick={refresh} disabled={!canQuery || loading} aria-label="Refresh models" title="Refresh models">
           <Icon name="refresh" size={14} />
@@ -226,7 +233,7 @@ function ProviderForm({
         onValue={setCustomModel}
         onCommit={(v) => {
           if (!v.trim() || v.trim() === state.model) return;
-          void configure(state.id, { model: v.trim() }, `Model set to ${v.trim()}.`).then(() => setCustomModel(""));
+          void configure(state.id, { model: v.trim(), activate: true }, `Model set to ${v.trim()}.`).then(() => setCustomModel(""));
         }}
       />
       {preset.id === "ollama" && models?.length === 0 && (
@@ -280,7 +287,15 @@ type ProviderModels = { state: "loading" } | { state: "ok"; models: string[] } |
  * provider. The active provider offers all its models until some are chosen;
  * other providers offer none until some are chosen.
  */
-function PromptModels({ settings, configure }: { settings: Settings; configure(id: ProviderId, update: ProviderUpdate, note?: string): Promise<void> }) {
+export function PromptModels({ settings, onSettings }: { settings: Settings; onSettings(s: Settings, note?: string): void }) {
+  const configure = useCallback(
+    (id: ProviderId, update: ProviderUpdate, note?: string) =>
+      api
+        .invoke("settings:configure-provider", id, update)
+        .then((s) => onSettings(s, note))
+        .catch((e) => toast(errorMessage(e), "danger")),
+    [onSettings],
+  );
   const [listed, setListed] = useState<Partial<Record<ProviderId, ProviderModels>>>({});
   const [filter, setFilter] = useState("");
   const candidates = settings.providers.filter((p) => p.hasApiKey || !providerPreset(p.id).needsKey);
@@ -319,8 +334,8 @@ function PromptModels({ settings, configure }: { settings: Settings; configure(i
 
   if (!groups.length) return null;
   return (
-    <fieldset className="shown-models">
-      <legend>Models in the prompt</legend>
+    <section className="card form shown-models">
+      <h2>Models in the prompt</h2>
       <p className="muted small">
         {picked} of {total} models from {groups.length} {groups.length === 1 ? "provider" : "providers"} show in the model menu under the prompt. Picking a
         model from another provider there switches to that provider.
@@ -334,7 +349,7 @@ function PromptModels({ settings, configure }: { settings: Settings; configure(i
           const save = (next: string[]) => void configure(p.id, { shownModels: next });
           return (
             <section key={p.id} className="shown-models-group" aria-label={label}>
-              <div className="row">
+              <div className="row shown-models-head">
                 <strong className="grow">
                   {label}
                   {active && <span className="tag accent">Active</span>}
@@ -360,6 +375,6 @@ function PromptModels({ settings, configure }: { settings: Settings; configure(i
           );
         })}
       </div>
-    </fieldset>
+    </section>
   );
 }

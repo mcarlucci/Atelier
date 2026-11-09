@@ -5,7 +5,7 @@
  * chat-completions API that most hosted and local servers expose.
  */
 
-export type ProviderId = "anthropic" | "ollama" | "lmstudio" | "openrouter" | "groq" | "gemini" | "mistral" | "custom";
+export type ProviderId = "anthropic" | "openai" | "ollama" | "lmstudio" | "openrouter" | "groq" | "gemini" | "mistral" | "custom";
 export type ProviderKind = "anthropic" | "ollama" | "openai";
 
 export interface ProviderPreset {
@@ -34,6 +34,17 @@ export const PROVIDERS: readonly ProviderPreset[] = [
     blurb: "Claude models. Best results, with prompt caching and adaptive thinking.",
     setupUrl: "https://console.anthropic.com/settings/keys",
     modelPlaceholder: "claude-opus-5-5",
+  },
+  {
+    id: "openai",
+    label: "OpenAI",
+    kind: "openai",
+    local: false,
+    needsKey: true,
+    defaultBaseUrl: "https://api.openai.com/v1",
+    blurb: "GPT models through the OpenAI API.",
+    setupUrl: "https://platform.openai.com/api-keys",
+    modelPlaceholder: "gpt-5",
   },
   {
     id: "ollama",
