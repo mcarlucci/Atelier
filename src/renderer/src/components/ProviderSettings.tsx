@@ -51,7 +51,7 @@ export default function ProviderSettings({
                 {selected && <Icon name="check" size={14} className="provider-check" />}
               </span>
               <span className="muted small">{p.blurb}</span>
-              {!p.local && p.needsKey && <span className={`small ${state.hasApiKey ? "ok" : "muted"}`}>{state.hasApiKey ? "Key saved" : "Needs a key"}</span>}
+              {!p.local && p.needsKey && <span className={`small ${state.hasApiKey ? "ok" : "muted"}`}>{state.authSource ? "Using your organization's credentials" : state.hasApiKey ? "Key saved" : "Needs a key"}</span>}
             </button>
           );
         })}
@@ -173,7 +173,7 @@ function ProviderForm({
             className="grow"
             type="password"
             label={preset.needsKey ? "API key" : "API key (optional)"}
-            placeholder={state.hasApiKey ? "•••••••• saved" : preset.id === "anthropic" ? "sk-ant-…" : "Paste a key"}
+            placeholder={state.authSource ? `Optional: using ${state.authSource}` : state.hasApiKey ? "•••••••• saved" : preset.id === "anthropic" ? "sk-ant-…" : "Paste a key"}
             value={key}
             onValue={setKey}
             description="Encrypted with the OS keychain. It is only sent to this provider."
@@ -185,7 +185,7 @@ function ProviderForm({
           >
             Save key
           </button>
-          {state.hasApiKey && <button onClick={() => void configure(state.id, { apiKey: null }, "API key removed.")}>Remove</button>}
+          {state.hasApiKey && !state.authSource && <button onClick={() => void configure(state.id, { apiKey: null }, "API key removed.")}>Remove</button>}
         </div>
       )}
 
