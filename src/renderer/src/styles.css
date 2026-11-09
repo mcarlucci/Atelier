@@ -2315,6 +2315,24 @@ slab-disclosure.files-disclosure::part(summary) {
   margin: 0;
 }
 
+.wiz-bar {
+  block-size: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.wiz-bar span {
+  display: block;
+  block-size: 100%;
+  background: var(--accent);
+  transition: inline-size 0.4s ease;
+}
+
+.wiz-bar-label {
+  margin: 4px 0 12px;
+}
+
 .wiz-steps {
   display: flex;
   gap: 8px;

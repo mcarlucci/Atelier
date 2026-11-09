@@ -124,6 +124,24 @@ export const PROVIDERS: readonly ProviderPreset[] = [
   },
 ];
 
+/** A provider Atelier found on this computer without the user entering anything. */
+export interface DetectedProvider {
+  id: ProviderId;
+  /** `env`: a key sits in an environment variable. `local`: a server answered on its default port. */
+  via: "env" | "local";
+  /** Variable name, or "N models". Never a secret. */
+  detail: string;
+}
+
+/** Environment variables that commonly hold a key for each hosted provider. First one set wins. */
+export const ENV_KEYS: Partial<Record<ProviderId, readonly string[]>> = {
+  openai: ["OPENAI_API_KEY"],
+  openrouter: ["OPENROUTER_API_KEY"],
+  groq: ["GROQ_API_KEY"],
+  gemini: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
+  mistral: ["MISTRAL_API_KEY"],
+};
+
 export const DEFAULT_OLLAMA_CONTEXT = 32768;
 
 export function providerPreset(id: string): ProviderPreset {

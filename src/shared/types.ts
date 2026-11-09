@@ -237,6 +237,8 @@ export interface ProviderSettings {
   hasApiKey: boolean;
   /** Anthropic only: no key is saved, but credentials managed by the user's organization were found (e.g. "profile default"). Counts as usable. */
   authSource?: string;
+  /** A key or credentials found on this computer (environment variable, organization profile). `ignored`: the user opted out of using them. */
+  detected?: { source: string; ignored: boolean };
   /** Last model chosen for this provider. */
   model: string;
   /** Ollama only: context window requested per turn, in tokens. */
@@ -279,6 +281,8 @@ export interface ProviderUpdate {
   contextLength?: number;
   /** Models offered in the prompt's model picker, or null to offer all again. */
   shownModels?: string[] | null;
+  /** false: ignore values auto-detected for this provider. true: use them again. */
+  useDetected?: boolean;
   /** Make this the active provider. */
   activate?: boolean;
 }

@@ -16,7 +16,7 @@ import type {
   RunnerStatus,
   Settings,
 } from "@shared/types";
-import { PROVIDERS, providerPreset, type ProviderId } from "@shared/providers";
+import { ENV_KEYS, PROVIDERS, providerPreset, type DetectedProvider, type ProviderId } from "@shared/providers";
 import type { EventChannels } from "@shared/ipc";
 import { applyFileActions, elideFileBodies, parseResponse, safeJoin } from "./chat/actions";
 import { checkCompliance } from "./chat/compliance";
@@ -194,6 +194,10 @@ export class Services {
     const encrypted = update.apiKey === undefined ? undefined : update.apiKey?.trim() ? await this.deps.secrets.encrypt(update.apiKey.trim()) : null;
     this.store.update((d) => {
       if (update.activate) d.settings.provider = id;
+      if (update.useDetected !== undefined) {
+        const rest = (d.settings.ignoredDetected ?? []).filter((x) => x !== id);
+        d.settings.ignoredDetected = update.useDetected ? rest : [...rest, id];
+      }
       // Kept with the other providers' configs, including Anthropic's.
       if (update.shownModels !== undefined) {
         const c = ((d.settings.providerConfigs ??= {})[id] ??= {});
@@ -228,18 +232,67 @@ export class Services {
     return this.configureProvider("anthropic", { apiKey: key });
   }
 
+  private isIgnored(id: ProviderId): boolean {
+    return Boolean(this.store.get().settings.ignoredDetected?.includes(id));
+  }
+
+  private envKey(id: ProviderId): { name: string; value: string } | null {
+    for (const name of ENV_KEYS[id] ?? []) {
+      const value = process.env[name]?.trim();
+      if (value) return { name, value };
+    }
+    return null;
+  }
+
+  /** Hosted providers with a key in the environment and local servers that answer, skipping ones already set up. */
+  async detectProviders(): Promise<DetectedProvider[]> {
+    const found: DetectedProvider[] = [];
+    for (const p of PROVIDERS) {
+      if (this.isIgnored(p.id)) continue;
+      if (p.needsKey && !this.providerSettings(p.id).hasApiKey) {
+        const k = this.envKey(p.id);
+        if (k) found.push({ id: p.id, via: "env", detail: k.name });
+      }
+    }
+    const local = PROVIDERS.filter((p) => p.local && !this.isIgnored(p.id) && !this.providerSettings(p.id).model);
+    const probes = await Promise.all(local.map((p) => this.listProviderModels(p.id)));
+    local.forEach((p, i) => {
+      const n = probes[i].models.length;
+      if (!probes[i].error && n) found.push({ id: p.id, via: "local", detail: `${n} model${n === 1 ? "" : "s"}` });
+    });
+    return found;
+  }
+
+  async useDetectedProvider(id: ProviderId): Promise<Settings> {
+    const preset = providerPreset(id);
+    if (preset.local) {
+      const [model] = (await this.listProviderModels(id)).models;
+      if (!model) throw new Error(`${preset.label} has no models to use.`);
+      return this.configureProvider(id, { model, activate: true, useDetected: true });
+    }
+    const key = this.envKey(id);
+    if (!key) throw new Error(`No ${preset.label} key found in the environment.`);
+    return this.configureProvider(id, { apiKey: key.value, activate: true, useDetected: true });
+  }
+
   private providerSettings(id: ProviderId): ProviderSettings {
     const s = this.store.get().settings;
     const preset = providerPreset(id);
     if (id === "anthropic") {
       const shownModels = s.providerConfigs?.anthropic?.shownModels;
-      const ownKey = Boolean(s.encryptedApiKey || process.env.ANTHROPIC_API_KEY);
-      const authSource = ownKey ? undefined : detectFederatedAuth()?.source;
-      return { id, baseUrl: "", hasApiKey: ownKey || Boolean(authSource), ...(authSource ? { authSource } : {}), model: s.model, ...(shownModels ? { shownModels } : {}) };
+      const ignored = this.isIgnored(id);
+      const envKey = Boolean(process.env.ANTHROPIC_API_KEY);
+      const ownKey = Boolean(s.encryptedApiKey || (envKey && !ignored));
+      const found = detectFederatedAuth()?.source;
+      const authSource = ownKey || ignored ? undefined : found;
+      const source = s.encryptedApiKey ? undefined : envKey ? "ANTHROPIC_API_KEY" : found;
+      return { id, baseUrl: "", hasApiKey: ownKey || Boolean(authSource), ...(authSource ? { authSource } : {}), ...(source ? { detected: { source, ignored } } : {}), model: s.model, ...(shownModels ? { shownModels } : {}) };
     }
     const c = s.providerConfigs?.[id] ?? {};
+    const env = c.encryptedApiKey ? null : this.envKey(id);
     return {
       id,
+      ...(env ? { detected: { source: env.name, ignored: this.isIgnored(id) } } : {}),
       baseUrl: c.baseUrl ?? preset.defaultBaseUrl,
       hasApiKey: Boolean(c.encryptedApiKey),
       model: c.model ?? "",
@@ -254,7 +307,7 @@ export class Services {
     const preset = providerPreset(id);
     const ps = this.providerSettings(id);
     const enc = id === "anthropic" ? s.encryptedApiKey : s.providerConfigs?.[id]?.encryptedApiKey;
-    const apiKey = enc ? await this.deps.secrets.decrypt(enc) : id === "anthropic" ? process.env.ANTHROPIC_API_KEY : undefined;
+    const apiKey = enc ? await this.deps.secrets.decrypt(enc) : id === "anthropic" && !this.isIgnored(id) ? process.env.ANTHROPIC_API_KEY : undefined;
     // With no key, the Anthropic SDK resolves organization-managed credentials itself.
     if (preset.needsKey && !apiKey && !ps.authSource) throw new Error(`Add a ${preset.label} API key in Settings first.`);
     return { preset, baseUrl: ps.baseUrl, apiKey, model: ps.model, effort: s.effort, contextLength: ps.contextLength };
