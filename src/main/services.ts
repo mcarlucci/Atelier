@@ -142,12 +142,15 @@ export class Services {
   getSettings(): Settings {
     const s = this.store.get().settings;
     const providers = PROVIDERS.map((p) => this.providerSettings(p.id));
-    const active = providers.find((p) => p.id === (s.provider ?? "anthropic"))!;
+    const usable = (p: ProviderSettings) => Boolean(p.model) && (p.hasApiKey || !providerPreset(p.id).needsKey);
+    const chosen = providers.find((p) => p.id === (s.provider ?? "anthropic"))!;
+    // A chosen provider with no model or key would block setup even though another one is ready, so use that one instead.
+    const active = usable(chosen) ? chosen : (providers.find(usable) ?? chosen);
     return {
       provider: active.id,
       model: active.model,
       effort: s.effort,
-      ready: Boolean(active.model) && (active.hasApiKey || !providerPreset(active.id).needsKey),
+      ready: usable(active),
       appsFolder: s.appsFolder,
       providers,
       lastDesignSystemId: s.lastDesignSystemId,

@@ -89,7 +89,7 @@ Use Claude for the best results, or keep everything on your computer with a free
 
 <img src="docs/images/models.png" alt="AI model settings showing Anthropic, Ollama, LM Studio, OpenRouter, Groq, Google Gemini, Mistral and OpenAI-compatible providers" width="720">
 
-Supported providers: Anthropic (Claude), Ollama, LM Studio, OpenRouter, Groq, Google Gemini, Mistral, and any OpenAI-compatible server such as vLLM or llama.cpp. See [AI models](docs/models.md).
+Supported providers: Anthropic (Claude), OpenAI, Ollama, LM Studio, OpenRouter, Groq, Google Gemini, Mistral, and any OpenAI-compatible server such as vLLM or llama.cpp. See [AI models](docs/models.md).
 
 ## Connect Figma and Storybook
 

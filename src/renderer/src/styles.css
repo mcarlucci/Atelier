@@ -1926,7 +1926,7 @@ iframe.preview {
 
 .provider-check {
   margin-left: auto;
-  color: var(--accent);
+  color: var(--ok);
 }
 
 .tag {
@@ -1963,21 +1963,6 @@ iframe.preview {
   margin: 0;
 }
 
-.shown-models {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  border: none;
-  min-width: 0;
-}
-
-.shown-models legend {
-  padding: 0;
-  font-weight: 600;
-}
-
 .shown-models p {
   margin: 0;
 }
@@ -1988,10 +1973,20 @@ iframe.preview {
   gap: 6px;
   max-block-size: 420px;
   overflow: auto;
-  padding: 10px 12px;
+  padding: 0 12px 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--panel);
+}
+
+/* Stays at the top of the scrolling list so the models below always show which provider they belong to. */
+.shown-models-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-block: 10px 6px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
 }
 
 .shown-models-group {
@@ -2001,7 +1996,6 @@ iframe.preview {
 }
 
 .shown-models-group + .shown-models-group {
-  padding-top: 10px;
   border-top: 1px solid var(--border);
 }
 

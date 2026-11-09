@@ -2,14 +2,14 @@
 
 [← Back to README](../README.md)
 
-Choose a model provider under **Settings → AI model**:
+Connect one or more model providers under **Settings → AI providers**:
 
 | Provider | Kind | Key |
 |---|---|---|
 | Anthropic (default: Claude Opus 5.5, adaptive thinking, selectable effort) | Anthropic SDK, with prompt caching | Required, or set `ANTHROPIC_API_KEY`. Settings offers to import one saved in macOS Keychain or Windows Credential Manager under the name `Atelier`, `anthropic`, `ANTHROPIC_API_KEY` or `anthropic-api-key` |
 | Ollama | Native `/api/chat`, with a configurable context window (default 32768 tokens) | None, runs locally |
 | LM Studio | OpenAI-compatible | None, runs locally |
-| OpenRouter, Groq, Google Gemini, Mistral | OpenAI-compatible | Required (each has a free tier) |
+| OpenAI, OpenRouter, Groq, Google Gemini, Mistral | OpenAI-compatible | Required (most have a free tier) |
 | OpenAI-compatible (vLLM, llama.cpp, Jan, LocalAI, Together, DeepSeek, …) | OpenAI-compatible | Optional |
 
 **Organization-managed Anthropic credentials.** If your organization issues credentials through Anthropic workload identity federation or OAuth profiles, you do not need a key. With no key saved, Atelier detects an active profile in `~/.config/anthropic` (or `ANTHROPIC_CONFIG_DIR`), `ANTHROPIC_PROFILE`, the federation variables, or `ANTHROPIC_AUTH_TOKEN`, and lets the Anthropic SDK authenticate with it. Atelier checks that these exist but never reads the credential files itself. A key you save always takes precedence. Variables set in a shell are only seen when the app is started from that shell, so a profile on disk is the reliable route.
