@@ -1,7 +1,7 @@
 import { run, type RunResult } from "./process";
 
 /** Names looked up, in order, as the service (macOS) or target (Windows) of a generic credential. */
-export const KEY_ITEM_NAMES = ["Atelier", "anthropic", "ANTHROPIC_API_KEY", "anthropic-api-key"];
+export const KEY_ITEM_NAMES = ["Atelier", "anthropic", "ANTHROPIC_API_KEY", "anthropic-api-key", "Claude Code"];
 
 type Runner = (command: string, args: string[], options?: { env?: NodeJS.ProcessEnv }) => Promise<RunResult>;
 

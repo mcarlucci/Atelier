@@ -37,6 +37,12 @@ describe("macOS keychain", () => {
     expect(await readKeychainKey("darwin", mac({ anthropic: "hunter2" }).runner)).toBeUndefined();
   });
 
+  it("reads Claude Code's own API key but never its OAuth credentials", async () => {
+    expect(await readKeychainKey("darwin", mac({ "Claude Code": KEY }).runner)).toBe(KEY);
+    const oauth = JSON.stringify({ claudeAiOauth: { accessToken: "sk-ant-oat01-x" } });
+    expect(await readKeychainKey("darwin", mac({ "Claude Code-credentials": oauth, "Claude Code": oauth }).runner)).toBeUndefined();
+  });
+
   it("treats a missing tool as not found", async () => {
     const runner = async () => {
       throw new Error("ENOENT");
