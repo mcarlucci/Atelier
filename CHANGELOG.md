@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/mcarlucci/Atelier/compare/v0.12.0...v0.13.0) (2026-11-09)
+
+
+### Features
+
+* **provider:** enhance provider detection and settings management ([b453887](https://github.com/mcarlucci/Atelier/commit/b453887aa5411fa2c2accaed28df0714d740d7c1))
+
 ## [0.12.0](https://github.com/mcarlucci/Atelier/compare/v0.11.0...v0.12.0) (2026-11-09)
 
 
