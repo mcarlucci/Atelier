@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/mcarlucci/Atelier/compare/v0.13.0...v0.14.0) (2026-11-10)
+
+
+### Features
+
+* **provider:** add Claude Code to key item names and enhance related tests ([2a8c90d](https://github.com/mcarlucci/Atelier/commit/2a8c90deadaf6d293f6a9b99bffcdbeaa74bfcb6))
+
 ## [0.13.0](https://github.com/mcarlucci/Atelier/compare/v0.12.0...v0.13.0) (2026-11-09)
 
 
