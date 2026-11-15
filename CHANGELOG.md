@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/mcarlucci/Atelier/compare/v0.16.0...v0.17.0) (2026-11-15)
+
+
+### Features
+
+* **mcp:** implement MCP server export functionality and add related documentation ([abda86f](https://github.com/mcarlucci/Atelier/commit/abda86ffa042fa9e81d5051999b1486a23fe6f56))
+
 ## [0.16.0](https://github.com/mcarlucci/Atelier/compare/v0.15.0...v0.16.0) (2026-11-15)
 
 
