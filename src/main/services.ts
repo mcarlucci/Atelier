@@ -41,6 +41,7 @@ import type { FetchFn } from "./node/dist";
 import { ConnectorService } from "./connectors/service";
 import { UpdateService, type UpdaterLike } from "./updater";
 import { InvariantRunner, OUTPUT_DIR } from "./invariant/runner";
+import { exportMcpServer } from "./invariant/export";
 import type { InvariantBrowserReport, InvariantStatus, InvariantValidateResult } from "@shared/invariant";
 import type { ComplianceIssue, PreviewCheck } from "@shared/types";
 import { sanitizeSelection, selectionPrompt } from "./preview/selection";
@@ -582,6 +583,20 @@ export class Services {
   async recompileDesignSystem(id: string): Promise<DesignSystem> {
     await this.compileDesignSystem(id);
     return publicDs(this.storedDs(id));
+  }
+
+  /** Writes the design system's contract as an MCP server folder at `folder`, which must not exist. */
+  exportDesignSystemMcp(id: string, folder: string): string {
+    const ds = this.storedDs(id);
+    const cliVersion = this.invariant.version();
+    if (!cliVersion) throw new Error("Invariant UI is not installed.");
+    return exportMcpServer({
+      contractDir: path.join(this.dsWorkDir(id), OUTPUT_DIR),
+      folder,
+      name: ds.name,
+      packageName: ds.packageName,
+      cliVersion,
+    });
   }
 
   invariantBrowserReady(): boolean {

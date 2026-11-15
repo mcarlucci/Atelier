@@ -321,6 +321,18 @@ function DesignSystemDetail({
           </p>
         </div>
         <div className="row">
+          <button
+            disabled={busy || !ds.invariant?.components}
+            title={ds.invariant?.components ? "Save this design system's contract as an MCP server folder" : "Compile the contract under Compliance first"}
+            onClick={() =>
+              run(async () => {
+                const folder = await api.invoke("ds:export-mcp", ds.id);
+                if (folder) toast(`MCP server saved to ${folder}.`, "success");
+              })
+            }
+          >
+            Export MCP server
+          </button>
           <button disabled={busy} onClick={() => run(() => api.invoke("ds:reimport", ds.id))}>
             {busy ? "Working…" : "Re-import"}
           </button>

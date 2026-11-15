@@ -71,6 +71,8 @@ export interface InvokeChannels {
   "ds:delete": { args: [string]; result: void };
   "ds:preview-rules": { args: [string]; result: string };
   "ds:select-folder": { args: []; result: string | null };
+  /** Asks where to save the design system's MCP server folder, then writes it there. Returns the new folder, or null when cancelled. */
+  "ds:export-mcp": { args: [string]; result: string | null };
 
   "app:list": { args: []; result: AppRecord[] };
   /** Without a templateId, the design system's default template is used. */
@@ -183,6 +185,7 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   "ds:delete",
   "ds:preview-rules",
   "ds:select-folder",
+  "ds:export-mcp",
   "app:list",
   "app:create",
   "app:delete",

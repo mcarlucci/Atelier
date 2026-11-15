@@ -142,6 +142,7 @@ Atelier is in early development (0.x). React works end to end. Vue and Angular s
 - [AI models](docs/models.md)
 - [Connectors](docs/connectors.md)
 - [Compliance with Invariant UI](docs/compliance.md)
+- [Use a design system in any chat client (MCP export)](docs/mcp-export.md)
 - [Security](docs/security.md)
 - [Contributing](CONTRIBUTING.md): run from source, run the tests, and make releases.
 

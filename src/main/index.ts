@@ -6,6 +6,7 @@ import { autoUpdater } from "electron-updater";
 import { useBundledGit } from "./git";
 import { openPreviewWindow } from "./preview/window";
 import { Services } from "./services";
+import { mcpServerSlug } from "./invariant/export";
 import type { UpdaterLike } from "./updater";
 import { selectorScript } from "./preview/selector";
 
@@ -137,6 +138,15 @@ function registerHandlers(services: Services): void {
         properties: ["openDirectory"],
       });
       return result.canceled ? null : result.filePaths[0];
+    },
+    "ds:export-mcp": async (id) => {
+      const ds = services.getDesignSystem(id);
+      const result = await dialog.showSaveDialog(mainWindow!, {
+        title: "Save the MCP server",
+        buttonLabel: "Save",
+        defaultPath: `${mcpServerSlug(ds.name)}-mcp`,
+      });
+      return result.canceled || !result.filePath ? null : services.exportDesignSystemMcp(id, result.filePath);
     },
 
     "app:list": () => services.listApps(),
