@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/mcarlucci/Atelier/compare/v0.15.0...v0.16.0) (2026-11-15)
+
+
+### Features
+
+* **svg:** update dimensions of atelier wordmark SVG files to 640px width ([85b476a](https://github.com/mcarlucci/Atelier/commit/85b476adb7ed6cb9424a6ed52669488d04d8553a))
+
 ## [0.15.0](https://github.com/mcarlucci/Atelier/compare/v0.14.0...v0.15.0) (2026-11-15)
 
 
