@@ -64,7 +64,7 @@ export interface ServiceDeps {
   bundledNodeDir?: string;
   /** Don't install Playwright after a design system import. Tests set it to stay off the network. */
   skipBrowserInstall?: boolean;
-  /** The invariant-ui package shipped with the app (resources/invariant), if any. */
+  /** The Invariant UI CLI package shipped with the app (resources/invariant), if any. */
   bundledInvariantDir?: string;
   /** nodejs.org/dist mirror for networks that block nodejs.org. */
   nodeMirror?: string;

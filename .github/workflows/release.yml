@@ -58,18 +58,9 @@ jobs:
         env:
           KEY: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
         run: echo "$KEY" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
-      # Pinned: the bundled Invariant UI must not change between rebuilds of the same tag.
-      - name: Build Invariant UI
-        env:
-          INVARIANT_REF: 401c63d2ba7a969bced79b184d75d61b355e2360
-        run: |
-          git clone https://github.com/mcarlucci/invariant.git "$RUNNER_TEMP/invariant"
-          git -C "$RUNNER_TEMP/invariant" checkout "$INVARIANT_REF"
-          cd "$RUNNER_TEMP/invariant"
-          npx -y pnpm@12.16.1 install --frozen-lockfile
-          npx -y pnpm@12.16.1 run build:npm
+      # Pinned in scripts/fetch-invariant.ts: the bundled Invariant UI CLI must not change between rebuilds of the same tag.
       - name: Bundle Invariant UI
-        run: npm run fetch-invariant -- --from "$RUNNER_TEMP/invariant/dist-npm"
+        run: npm run fetch-invariant
       # Stops a release whose bundled Invariant can't compile a design system (Compliance -> Contract).
       - name: Check bundled Invariant UI
         run: npx vitest run tests/invariant.e2e.test.ts

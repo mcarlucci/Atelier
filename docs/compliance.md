@@ -33,6 +33,6 @@ The contract is compiled once per design system and copied into each app, togeth
 ## Notes
 
 - **Local only.** Invariant uses no account, cloud or network. Recompiling unchanged sources gives identical output.
-- **Bundled copy.** Atelier ships one copy of Invariant UI (about 44 MB, plain JavaScript) and runs it with Atelier's own Node.js. Invariant requires Node.js 24 or newer; Atelier's bundled Node.js qualifies.
+- **Bundled copy.** Atelier ships one copy of the Invariant UI CLI (about 54 MB, plain JavaScript) and runs it with Atelier's own Node.js. The CLI requires Node.js 20 or newer; Atelier's bundled Node.js qualifies.
 - **License.** Invariant UI is source-available under FSL-1.1-ALv2 and becomes Apache-2.0 two years after each release. See `THIRD_PARTY_NOTICES.md`.
-- **Developing Atelier.** Run `npm run fetch-invariant -- --from <path to invariant/dist-npm>` once to place it in `resources/invariant` (build it with `pnpm run build:npm` in the Invariant repo). Release builds do this in CI from a pinned commit of the Invariant repo, which must include declaration-file support for React, Vue and Angular (`declarations: true`).
+- **Developing Atelier.** Run `npm run fetch-invariant` once to place the Invariant UI CLI (`@invariant-ui/cli`, pinned in `scripts/fetch-invariant.ts`) in `resources/invariant`. Release builds run the same step in CI. The CLI must support declaration-file sources (`declarations: true`) for React, Vue and Angular.

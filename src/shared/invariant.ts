@@ -1,7 +1,7 @@
 /**
  * Types for Invariant UI (https://invariantui.com), which compiles a design
  * system into a contract and validates app code against it. Shapes mirror the
- * CLI's `--json` output (invariant-ui 0.1.x): `validate`, `browser run`.
+ * CLI's `--json` output (@invariant-ui/cli 0.3.x): `validate`, `browser run`.
  */
 
 export type InvariantSeverity = "error" | "warning" | "info";
@@ -68,7 +68,7 @@ export interface InvariantBrowserReport {
 
 /** What the renderer shows for an app or design system. */
 export interface InvariantStatus {
-  /** invariant-ui is installed in Atelier's managed directory. */
+  /** The Invariant UI CLI is installed in Atelier's managed directory. */
   installed: boolean;
   version?: string;
   /** A contract has been compiled for this design system. */

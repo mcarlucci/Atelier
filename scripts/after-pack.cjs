@@ -1,5 +1,5 @@
 // electron-builder never copies node_modules folders from extraResources, but the
-// bundled invariant-ui needs its dependencies beside it. Runs before code signing.
+// bundled Invariant UI CLI needs its dependencies beside it. Runs before code signing.
 const fs = require("node:fs");
 const path = require("node:path");
 

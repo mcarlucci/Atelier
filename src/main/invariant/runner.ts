@@ -11,8 +11,8 @@ import { run, type RunResult } from "../process";
 import { defaultBrowserSpec } from "./browser-spec";
 import { runtimeCommand, runtimeEnv, type NodeRuntime } from "../node/runtimes";
 
-export const INVARIANT_PACKAGE = "invariant-ui";
-export const INVARIANT_RANGE = "^0.1.0";
+export const INVARIANT_PACKAGE = "@invariant-ui/cli";
+export const INVARIANT_RANGE = "^0.3.0";
 export const PLAYWRIGHT_RANGE = "^1.64.0";
 export const CONFIG_FILE = "invariant.config.json";
 /**
@@ -27,7 +27,7 @@ export interface InvariantRunnerOptions {
   /** Writable folder the CLI is installed into. */
   toolDir: string;
   node(): Promise<NodeRuntime>;
-  /** Read-only folder holding the invariant-ui package shipped with the app (resources/invariant). Preferred over an install. */
+  /** Read-only folder holding the Invariant UI CLI package shipped with the app (resources/invariant). Preferred over an install. */
   bundledDir?: string;
   /** Replaced in tests. */
   exec?: Exec;

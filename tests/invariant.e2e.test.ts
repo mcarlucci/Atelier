@@ -1,6 +1,6 @@
 /**
  * End to end against the real Invariant UI CLI bundled in resources/invariant
- * (npm run fetch-invariant -- --from <invariant/dist-npm>). Skipped when it
+ * (npm run fetch-invariant). Skipped when it
  * isn't there. No network and no model: the fixture app has its design system
  * as workspace source, which Invariant can compile.
  */

@@ -16,9 +16,9 @@ function setup(exec: Exec) {
   const appDir = fs.mkdtempSync(path.join(os.tmpdir(), "inv-app-"));
   const runner = new InvariantRunner({ toolDir, node: async () => node, exec });
   const fakeInstall = () => {
-    const dir = path.join(toolDir, "node_modules", "invariant-ui");
+    const dir = path.join(toolDir, "node_modules", "@invariant-ui", "cli");
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ version: "0.1.0", bin: { invariant: "cli.js" } }));
+    fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ version: "0.3.0", bin: { invariant: "cli.js" } }));
   };
   return { runner, appDir, fakeInstall };
 }
@@ -67,11 +67,11 @@ describe("InvariantRunner", () => {
       return { code: 0, stdout: JSON.stringify({ contractHash: "b", summary: {}, violations: [], evaluations: [] }), stderr: "" };
     };
     const bundledDir = fs.mkdtempSync(path.join(os.tmpdir(), "inv-bundled-"));
-    fs.writeFileSync(path.join(bundledDir, "package.json"), JSON.stringify({ version: "0.1.0", bin: { invariant: "dist/cli/main.js" } }));
+    fs.writeFileSync(path.join(bundledDir, "package.json"), JSON.stringify({ version: "0.3.0", bin: { invariant: "dist/cli/main.js" } }));
     const toolDir = fs.mkdtempSync(path.join(os.tmpdir(), "inv-tool-"));
     const runner = new InvariantRunner({ toolDir, bundledDir, node: async () => node, exec });
     const appDir = fs.mkdtempSync(path.join(os.tmpdir(), "inv-app-"));
-    expect(runner.version()).toBe("0.1.0");
+    expect(runner.version()).toBe("0.3.0");
     await runner.validate(appDir, ["a.tsx"]);
     expect(calls.some((a) => a.includes("install"))).toBe(false);
     expect(calls[0][0]).toBe(path.join(bundledDir, "dist/cli/main.js"));
