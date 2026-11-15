@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/mcarlucci/Atelier/compare/v0.14.0...v0.15.0) (2026-11-15)
+
+
+### Features
+
+* **invariant:** update to use Invariant UI CLI and adjust related documentation ([1b01b08](https://github.com/mcarlucci/Atelier/commit/1b01b08fec372048cbf527eb06b31c124aad56b5))
+
 ## [0.14.0](https://github.com/mcarlucci/Atelier/compare/v0.13.0...v0.14.0) (2026-11-10)
 
 
